@@ -185,12 +185,12 @@ export default async function ServiceDetailPage({ params }: ServiceDetailPagePro
             >
               <Avatar
                 src={profile.avatar_url}
-                name={profile.display_name || profile.username}
+                name={profile.username}
                 size="md"
               />
               <div>
                 <div className="font-semibold text-ink-800">
-                  {profile.display_name || profile.username}
+                  {profile.username}
                 </div>
                 <div className="text-sm text-ink-500">@{profile.username}</div>
               </div>

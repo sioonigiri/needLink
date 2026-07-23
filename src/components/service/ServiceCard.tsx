@@ -129,11 +129,11 @@ export function ServiceCard({ service, currentUserId }: ServiceCardProps) {
           <div className="flex items-center gap-2 pt-3 border-t border-cream-100">
             <Avatar
               src={service.profile.avatar_url}
-              name={service.profile.display_name || service.profile.username}
+              name={service.profile.username}
               size="xs"
             />
             <span className="text-xs text-ink-500">
-              {service.profile.display_name || service.profile.username}
+              {service.profile.username}
             </span>
           </div>
         </div>

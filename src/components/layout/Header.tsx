@@ -78,7 +78,7 @@ export function Header({ profile }: HeaderProps) {
                   <button className="flex items-center gap-2 p-1.5 rounded-xl hover:bg-cream-200 transition-colors">
                     <Avatar
                       src={profile.avatar_url}
-                      name={profile.display_name || profile.username}
+                      name={profile.username}
                       size="sm"
                     />
                   </button>

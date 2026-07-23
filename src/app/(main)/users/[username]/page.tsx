@@ -81,14 +81,13 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
           <Avatar
             src={profile.avatar_url}
-            name={profile.display_name || profile.username}
-            size="xl"
+            name={profile.username}
           />
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between gap-4 flex-wrap">
               <div>
                 <h1 className="text-2xl font-bold text-ink-800">
-                  {profile.display_name || profile.username}
+                  {profile.username}
                 </h1>
                 <p className="text-ink-500">@{profile.username}</p>
               </div>
