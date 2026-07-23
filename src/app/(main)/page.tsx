@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { ArrowRight, Sparkles, Users, Heart } from 'lucide-react'
+import { ArrowRight, Sparkles, Heart } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { ServiceCard } from '@/components/service/ServiceCard'
 import { Button } from '@/components/ui/Button'
@@ -57,12 +57,12 @@ export default async function HomePage() {
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             {user ? (
-              <Button size="lg" onClick={() => {}}>
-                <Link href="/services/new" className="flex items-center gap-2">
+              <Link href="/services/new">
+                <Button size="lg">
                   サービスを投稿する
                   <ArrowRight className="w-4 h-4" />
-                </Link>
-              </Button>
+                </Button>
+              </Link>
             ) : (
               <>
                 <Link href="/auth?tab=signup">
