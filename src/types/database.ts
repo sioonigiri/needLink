@@ -5,38 +5,41 @@ export type Database = {
         Row: {
           id: string
           username: string
-          display_name: string | null
+          slug: string | null
           bio: string | null
           avatar_url: string | null
           github_url: string | null
           twitter_url: string | null
           website_url: string | null
           tech_tags: string[]
+          links: Array<{ type: string; url: string }>
           created_at: string
           updated_at: string
         }
         Insert: {
           id: string
           username: string
-          display_name?: string | null
+          slug?: string | null
           bio?: string | null
           avatar_url?: string | null
           github_url?: string | null
           twitter_url?: string | null
           website_url?: string | null
           tech_tags?: string[]
+          links?: Array<{ type: string; url: string }>
           created_at?: string
           updated_at?: string
         }
         Update: {
           username?: string
-          display_name?: string | null
+          slug?: string | null
           bio?: string | null
           avatar_url?: string | null
           github_url?: string | null
           twitter_url?: string | null
           website_url?: string | null
           tech_tags?: string[]
+          links?: Array<{ type: string; url: string }>
           updated_at?: string
         }
       }
@@ -50,6 +53,7 @@ export type Database = {
           thumbnail_url: string | null
           screenshots: string[]
           tags: string[]
+          categories: string[]
           github_url: string | null
           website_url: string | null
           app_store_url: string | null
@@ -67,6 +71,7 @@ export type Database = {
           thumbnail_url?: string | null
           screenshots?: string[]
           tags?: string[]
+          categories?: string[]
           github_url?: string | null
           website_url?: string | null
           app_store_url?: string | null
@@ -82,6 +87,7 @@ export type Database = {
           thumbnail_url?: string | null
           screenshots?: string[]
           tags?: string[]
+          categories?: string[]
           github_url?: string | null
           website_url?: string | null
           app_store_url?: string | null

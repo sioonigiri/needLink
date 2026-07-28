@@ -2,11 +2,13 @@ import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
-import { Globe, ShoppingBag, Play, ExternalLink, Heart, Calendar } from 'lucide-react'
+import { Globe, ShoppingBag, Play, ExternalLink, Heart, Calendar, Pencil } from 'lucide-react'
 import { GithubIcon, XIcon } from '@/components/ui/Icons'
 import { Avatar } from '@/components/ui/Avatar'
 import { Badge } from '@/components/ui/Badge'
+import { TagChip } from '@/components/ui/TagChip'
 import { SERVICE_STATUS_LABELS, SERVICE_STATUS_COLORS, ServiceStatus } from '@/types'
+import { getCategoriesByIds } from '@/data/categories'
 import { cn, formatDate } from '@/lib/utils'
 import { FavoriteButton } from '@/components/service/FavoriteButton'
 import { FollowButton } from '@/components/profile/FollowButton'
@@ -97,19 +99,44 @@ export default async function ServiceDetailPage({ params }: ServiceDetailPagePro
               </h1>
               <p className="text-ink-500 text-lg">{service.tagline}</p>
             </div>
-            <FavoriteButton
-              serviceId={service.id}
-              userId={user?.id || null}
-              initialFavorited={isFavorited}
-              initialCount={favCount}
-            />
+            {user?.id === service.user_id ? (
+              <Link
+                href={`/services/${service.id}/edit`}
+                className="flex items-center gap-2 px-4 py-2 bg-white border border-cream-300 text-ink-700 hover:bg-cream-100 rounded-xl text-sm font-medium transition-colors"
+              >
+                <Pencil className="w-4 h-4" />
+                編集する
+              </Link>
+            ) : (
+              <FavoriteButton
+                serviceId={service.id}
+                userId={user?.id || null}
+                initialFavorited={isFavorited}
+                initialCount={favCount}
+              />
+            )}
           </div>
 
           {/* Tags */}
           {service.tags?.length > 0 && (
             <div className="flex flex-wrap gap-2 mt-4">
               {service.tags.map((tag: string) => (
-                <Badge key={tag}>{tag}</Badge>
+                <TagChip key={tag} variant="clickable" label={tag} />
+              ))}
+            </div>
+          )}
+
+          {/* Categories */}
+          {service.categories?.length > 0 && (
+            <div className="flex flex-wrap gap-2 mt-3">
+              {getCategoriesByIds(service.categories).map((cat) => (
+                <Link
+                  key={cat.id}
+                  href={`/search?categories=${cat.id}`}
+                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm bg-cream-100 text-ink-600 hover:bg-warm-100 hover:text-warm-700 transition-colors"
+                >
+                  {cat.emoji} {cat.label}
+                </Link>
               ))}
             </div>
           )}
@@ -180,7 +207,7 @@ export default async function ServiceDetailPage({ params }: ServiceDetailPagePro
               作者
             </h3>
             <Link
-              href={`/users/${profile.username}`}
+              href={`/users/${profile.slug || profile.username}`}
               className="flex items-center gap-3 hover:opacity-80 transition-opacity"
             >
               <Avatar
@@ -214,7 +241,7 @@ export default async function ServiceDetailPage({ params }: ServiceDetailPagePro
                 />
               )}
               <Link
-                href={`/users/${profile.username}`}
+                href={`/users/${profile.slug || profile.username}`}
                 className="flex-1 text-center px-3 py-2 text-sm text-ink-600 hover:bg-cream-100 rounded-xl border border-cream-300 transition-colors"
               >
                 プロフィールを見る
@@ -258,15 +285,6 @@ export default async function ServiceDetailPage({ params }: ServiceDetailPagePro
             )}
           </div>
 
-          {/* Edit button (owner only) */}
-          {user?.id === service.user_id && (
-            <Link
-              href={`/services/${service.id}/edit`}
-              className="block w-full text-center px-4 py-2.5 bg-white border border-cream-300 text-ink-700 hover:bg-cream-100 rounded-xl text-sm font-medium transition-colors"
-            >
-              編集する
-            </Link>
-          )}
         </div>
       </div>
     </div>

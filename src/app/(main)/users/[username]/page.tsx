@@ -1,10 +1,10 @@
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { Globe } from 'lucide-react'
-import { GithubIcon, XIcon } from '@/components/ui/Icons'
+import { getLinkService } from '@/data/links'
 import { Avatar } from '@/components/ui/Avatar'
 import { Badge } from '@/components/ui/Badge'
+import { TagChip } from '@/components/ui/TagChip'
 import { ServiceCard } from '@/components/service/ServiceCard'
 import { FollowButton } from '@/components/profile/FollowButton'
 import { ServiceWithProfile } from '@/types'
@@ -17,10 +17,12 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
   const supabase = createClient()
   const { data: { user: currentUser } } = await supabase.auth.getUser()
 
+  const slug = decodeURIComponent(params.username)
+
   const { data: profileRaw } = await supabase
     .from('profiles')
     .select('*')
-    .eq('username', params.username)
+    .eq('slug', slug)
     .single()
 
   if (!profileRaw) notFound()
@@ -82,6 +84,7 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
           <Avatar
             src={profile.avatar_url}
             name={profile.username}
+            size="xl"
           />
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between gap-4 flex-wrap">
@@ -89,7 +92,7 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                 <h1 className="text-2xl font-bold text-ink-800">
                   {profile.username}
                 </h1>
-                <p className="text-ink-500">@{profile.username}</p>
+                <p className="text-ink-500">@{profile.slug || profile.username}</p>
               </div>
               {currentUser && currentUser.id !== profile.id && (
                 <FollowButton
@@ -115,7 +118,7 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
             {profile.tech_tags?.length > 0 && (
               <div className="flex flex-wrap gap-1.5 mt-3">
                 {profile.tech_tags.map((tag: string) => (
-                  <Badge key={tag} variant="warm">{tag}</Badge>
+                  <TagChip key={tag} variant="clickable" label={tag} />
                 ))}
               </div>
             )}
@@ -135,44 +138,38 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
               </div>
             </div>
 
-            {/* Social links */}
-            {(profile.github_url || profile.twitter_url || profile.website_url) && (
-              <div className="flex gap-3 mt-4">
-                {profile.github_url && (
-                  <a
-                    href={profile.github_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-1.5 text-sm text-ink-500 hover:text-ink-700 transition-colors"
-                  >
-                    <GithubIcon size={16} />
-                    GitHub
-                  </a>
-                )}
-                {profile.twitter_url && (
-                  <a
-                    href={profile.twitter_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-1.5 text-sm text-ink-500 hover:text-ink-700 transition-colors"
-                  >
-                    <XIcon size={16} />
-                    X (Twitter)
-                  </a>
-                )}
-                {profile.website_url && (
-                  <a
-                    href={profile.website_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-1.5 text-sm text-ink-500 hover:text-ink-700 transition-colors"
-                  >
-                    <Globe className="w-4 h-4" />
-                    Website
-                  </a>
-                )}
-              </div>
-            )}
+            {/* リンク（新フォーマット + 旧カラムフォールバック） */}
+            {(() => {
+              const newLinks: Array<{ type: string; url: string }> = profile.links || []
+              const fallbackLinks = [
+                profile.github_url  && { type: 'github',  url: profile.github_url },
+                profile.twitter_url && { type: 'twitter', url: profile.twitter_url },
+                profile.website_url && { type: 'website', url: profile.website_url },
+              ].filter(Boolean) as Array<{ type: string; url: string }>
+              const displayLinks = newLinks.length > 0 ? newLinks : fallbackLinks
+              const validLinks = displayLinks.filter((l) => l.url)
+              if (validLinks.length === 0) return null
+              return (
+                <div className="flex flex-wrap gap-3 mt-4">
+                  {validLinks.map((link) => {
+                    const service = getLinkService(link.type)
+                    if (!service) return null
+                    return (
+                      <a
+                        key={link.type}
+                        href={link.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1.5 text-sm text-ink-500 hover:text-ink-700 transition-colors"
+                      >
+                        <span className="text-base">{service.emoji}</span>
+                        {service.label}
+                      </a>
+                    )
+                  })}
+                </div>
+              )
+            })()}
           </div>
         </div>
       </div>

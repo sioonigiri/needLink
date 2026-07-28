@@ -10,12 +10,16 @@ import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/Button'
 import { Input, Textarea } from '@/components/ui/Input'
-import { TagInput } from '@/components/ui/TagInput'
+import { TagAutocomplete } from '@/components/ui/TagAutocomplete'
+import { FormAccordion } from '@/components/ui/FormAccordion'
+import { TagChip } from '@/components/ui/TagChip'
+import { SERVICE_CATEGORIES, getCategoriesByIds } from '@/data/categories'
 import { ServiceStatus } from '@/types'
+import { cn } from '@/lib/utils'
 
 const serviceSchema = z.object({
   name: z.string().min(1, 'サービス名は必須です').max(50, '50文字以内で入力してください'),
-  tagline: z.string().min(1, 'キャッチコピーは必須です').max(100, '100文字以内で入力してください'),
+  tagline: z.string().min(1, 'キャッチコピーは必須です').max(50, '50文字以内で入力してください'),
   description: z.string().max(2000, '2000文字以内で入力してください').optional(),
   github_url: z.string().url('正しいURLを入力してください').optional().or(z.literal('')),
   website_url: z.string().url('正しいURLを入力してください').optional().or(z.literal('')),
@@ -28,12 +32,15 @@ type ServiceFormValues = z.infer<typeof serviceSchema>
 
 interface ServiceFormProps {
   userId: string
-  initialData?: Partial<ServiceFormValues & { id: string; thumbnail_url: string; screenshots: string[]; tags: string[] }>
+  initialData?: Partial<ServiceFormValues & { id: string; thumbnail_url: string; screenshots: string[]; tags: string[]; categories: string[] }>
 }
 
 export function ServiceForm({ userId, initialData }: ServiceFormProps) {
   const router = useRouter()
   const [tags, setTags] = useState<string[]>(initialData?.tags || [])
+  const [categories, setCategories] = useState<string[]>(initialData?.categories || [])
+  const [tagAccOpen, setTagAccOpen] = useState(false)
+  const [catAccOpen, setCatAccOpen] = useState(false)
   const [thumbnail, setThumbnail] = useState<string | null>(initialData?.thumbnail_url || null)
   const [thumbnailFile, setThumbnailFile] = useState<File | null>(null)
   const [screenshots, setScreenshots] = useState<string[]>(initialData?.screenshots || [])
@@ -118,6 +125,7 @@ export function ServiceForm({ userId, initialData }: ServiceFormProps) {
         thumbnail_url: thumbnailUrl,
         screenshots: allScreenshots,
         tags,
+        categories,
         github_url: data.github_url || null,
         website_url: data.website_url || null,
         app_store_url: data.app_store_url || null,
@@ -155,32 +163,106 @@ export function ServiceForm({ userId, initialData }: ServiceFormProps) {
         <h2 className="font-semibold text-ink-800 text-lg">基本情報</h2>
         <Input
           label="サービス名 *"
-          placeholder="例: MyAwesomeApp"
+          placeholder=""
           error={errors.name?.message}
           {...register('name')}
         />
         <Input
           label="キャッチコピー *"
-          placeholder="例: チームのタスク管理をシンプルに"
-          hint="100文字以内でサービスの魅力を一言で"
+          placeholder=""
+          hint="50文字以内"
           error={errors.tagline?.message}
           {...register('tagline')}
         />
         <Textarea
           label="説明"
-          placeholder="サービスの概要、作った背景、使い方などを自由に書いてください"
+          placeholder=""
           rows={5}
           error={errors.description?.message}
           {...register('description')}
         />
-        <TagInput
-          label="タグ"
-          value={tags}
-          onChange={setTags}
-          placeholder="例: React, 生産性, タスク管理"
-          hint="Enterまたはカンマで追加（最大10個）"
-        />
-        <div>
+        {/* タグ（アコーディオン） */}
+        <FormAccordion
+          label="タグを選択"
+          count={tags.length}
+          open={tagAccOpen}
+          onToggle={() => setTagAccOpen((v) => !v)}
+          chips={
+            tags.length > 0 && !tagAccOpen ? (
+              <div className="flex flex-wrap gap-1.5">
+                {tags.map((tag) => (
+                  <TagChip
+                    key={tag}
+                    variant="removable"
+                    label={tag}
+                    onRemove={() => setTags((prev) => prev.filter((t) => t !== tag))}
+                  />
+                ))}
+              </div>
+            ) : undefined
+          }
+        >
+          <TagAutocomplete
+            value={tags}
+            onChange={setTags}
+            hideChips
+            hint="技術スタックや特徴を追加してください（最大10個）"
+          />
+        </FormAccordion>
+
+        {/* カテゴリ（アコーディオン） */}
+        <FormAccordion
+          label="カテゴリを選択"
+          count={categories.length}
+          open={catAccOpen}
+          onToggle={() => setCatAccOpen((v) => !v)}
+          chips={
+            categories.length > 0 && !catAccOpen ? (
+              <div className="flex flex-wrap gap-2">
+                {getCategoriesByIds(categories).map((cat) => (
+                  <span
+                    key={cat.id}
+                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm bg-warm-100 text-warm-700"
+                  >
+                    {cat.emoji} {cat.label}
+                    <button
+                      type="button"
+                      onClick={() => setCategories((prev) => prev.filter((c) => c !== cat.id))}
+                      className="text-warm-500 hover:text-warm-700 leading-none"
+                    >
+                      ×
+                    </button>
+                  </span>
+                ))}
+              </div>
+            ) : undefined
+          }
+        >
+          <div className="flex flex-wrap gap-2">
+            {SERVICE_CATEGORIES.map((cat) => {
+              const selected = categories.includes(cat.id)
+              return (
+                <button
+                  key={cat.id}
+                  type="button"
+                  onClick={() =>
+                    setCategories((prev) =>
+                      selected ? prev.filter((c) => c !== cat.id) : [...prev, cat.id]
+                    )
+                  }
+                  className={cn(
+                    'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-colors',
+                    selected
+                      ? 'bg-warm-500 text-white'
+                      : 'bg-white border border-cream-200 text-ink-600 hover:border-warm-400 hover:text-warm-600'
+                  )}
+                >
+                  {cat.emoji} {cat.label}
+                </button>
+              )
+            })}
+          </div>
+        </FormAccordion>        <div>
           <label className="text-sm font-medium text-ink-700 block mb-1.5">開発状況</label>
           <select
             className="w-full px-3.5 py-2.5 rounded-xl border border-cream-400 focus:border-warm-400 focus:ring-2 focus:ring-warm-400/20 outline-none bg-white text-ink-800"
@@ -272,25 +354,25 @@ export function ServiceForm({ userId, initialData }: ServiceFormProps) {
         <h2 className="font-semibold text-ink-800 text-lg">リンク</h2>
         <Input
           label="Webサイト"
-          placeholder="https://example.com"
+          placeholder=""
           error={errors.website_url?.message}
           {...register('website_url')}
         />
         <Input
           label="GitHub"
-          placeholder="https://github.com/username/repo"
+          placeholder=""
           error={errors.github_url?.message}
           {...register('github_url')}
         />
         <Input
           label="App Store"
-          placeholder="https://apps.apple.com/..."
+          placeholder=""
           error={errors.app_store_url?.message}
           {...register('app_store_url')}
         />
         <Input
           label="Google Play"
-          placeholder="https://play.google.com/..."
+          placeholder=""
           error={errors.google_play_url?.message}
           {...register('google_play_url')}
         />

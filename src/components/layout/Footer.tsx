@@ -54,12 +54,32 @@ export function Footer() {
                 </li>
               </ul>
             </div>
+            <div>
+              <div className="text-xs font-semibold text-ink-400 uppercase tracking-wider mb-3">
+                ヘルプ
+              </div>
+              <ul className="space-y-2">
+                <li>
+                  <Link href="/support" className="text-sm text-ink-600 hover:text-ink-800 transition-colors">
+                    サポート
+                  </Link>
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
 
         <div className="mt-10 pt-6 border-t border-cream-200 flex flex-col sm:flex-row justify-between items-center gap-4">
           <p className="text-xs text-ink-400">© 2026 NeedLink. All rights reserved.</p>
-          <p className="text-xs text-ink-400">個人開発者のためのショーケース</p>
+          <div className="flex items-center gap-4">
+            <Link
+              href="/support"
+              className="text-xs text-ink-500 hover:text-warm-600 transition-colors"
+            >
+              サポート
+            </Link>
+            <p className="text-xs text-ink-400">個人開発者のためのショーケース</p>
+          </div>
         </div>
       </div>
     </footer>

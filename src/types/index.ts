@@ -5,6 +5,8 @@ export type Service = Database['public']['Tables']['services']['Row']
 export type Favorite = Database['public']['Tables']['favorites']['Row']
 export type Follow = Database['public']['Tables']['follows']['Row']
 
+export type ProfileLink = { type: string; url: string }
+
 export type ServiceWithProfile = Service & {
   profile: Profile
   favorites_count: number

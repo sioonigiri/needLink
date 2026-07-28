@@ -1,3 +1,36 @@
+-- ============================================================
+-- Migration: profiles テーブルに links カラムを追加
+-- Supabaseのダッシュボード > SQL Editor で実行してください
+-- ============================================================
+ALTER TABLE public.profiles
+  ADD COLUMN IF NOT EXISTS links JSONB DEFAULT '[]'::jsonb;
+
+-- ============================================================
+-- Migration: profiles テーブルに slug カラムを追加
+-- ============================================================
+ALTER TABLE public.profiles
+  ADD COLUMN IF NOT EXISTS slug TEXT UNIQUE;
+
+-- 既存ユーザーのslugを username から自動設定（英数字のみ残す）
+-- UPDATE public.profiles
+-- SET slug = lower(regexp_replace(username, '[^a-z0-9_-]', '', 'g'))
+-- WHERE slug IS NULL;
+
+-- 既存ユーザーの旧カラムデータを links へ移行（任意）
+-- UPDATE public.profiles
+-- SET links = (
+--   SELECT jsonb_agg(entry)
+--   FROM (
+--     SELECT jsonb_build_object('type','github','url',github_url) AS entry WHERE github_url IS NOT NULL
+--     UNION ALL
+--     SELECT jsonb_build_object('type','twitter','url',twitter_url) WHERE twitter_url IS NOT NULL
+--     UNION ALL
+--     SELECT jsonb_build_object('type','website','url',website_url) WHERE website_url IS NOT NULL
+--   ) sub
+-- )
+-- WHERE links = '[]'::jsonb
+--   AND (github_url IS NOT NULL OR twitter_url IS NOT NULL OR website_url IS NOT NULL);
+
 -- NeedLink Phase 1 Database Schema
 -- Supabaseのダッシュボード > SQL Editor で実行してください
 
@@ -172,3 +205,11 @@ CREATE POLICY "認証済みユーザーがサービス画像をアップロー�
 --   RETURN NEW;
 -- END;
 -- $$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- ============================================================
+-- Migration: services テーブルに categories カラムを追加
+-- ============================================================
+ALTER TABLE public.services
+  ADD COLUMN IF NOT EXISTS categories TEXT[] DEFAULT '{}';
+
+NOTIFY pgrst, 'reload schema';

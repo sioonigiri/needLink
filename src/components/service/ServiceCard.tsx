@@ -2,12 +2,14 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { Heart } from 'lucide-react'
+import { Heart, Pencil } from 'lucide-react'
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { Avatar } from '@/components/ui/Avatar'
-import { Badge } from '@/components/ui/Badge'
+import { TagChip } from '@/components/ui/TagChip'
 import { createClient } from '@/lib/supabase/client'
 import { SERVICE_STATUS_LABELS, SERVICE_STATUS_COLORS, ServiceStatus, ServiceWithProfile } from '@/types'
+import { getCategoriesByIds } from '@/data/categories'
 import { cn } from '@/lib/utils'
 
 interface ServiceCardProps {
@@ -16,6 +18,7 @@ interface ServiceCardProps {
 }
 
 export function ServiceCard({ service, currentUserId }: ServiceCardProps) {
+  const router = useRouter()
   const [favorited, setFavorited] = useState(service.is_favorited ?? false)
   const [favoriteCount, setFavoriteCount] = useState(service.favorites_count)
   const [loading, setLoading] = useState(false)
@@ -50,6 +53,7 @@ export function ServiceCard({ service, currentUserId }: ServiceCardProps) {
   }
 
   const status = service.status as ServiceStatus
+  const isOwner = !!(currentUserId && currentUserId === service.user_id)
 
   return (
     <Link href={`/services/${service.id}`} className="group block">
@@ -81,19 +85,28 @@ export function ServiceCard({ service, currentUserId }: ServiceCardProps) {
               {SERVICE_STATUS_LABELS[status]}
             </span>
           </div>
-          {/* Favorite button */}
-          <button
-            onClick={toggleFavorite}
-            disabled={loading}
-            className={cn(
-              'absolute top-3 right-3 p-2 rounded-full backdrop-blur-sm transition-all duration-200',
-              favorited
-                ? 'bg-red-50 text-red-500'
-                : 'bg-white/80 text-ink-400 hover:text-red-400 hover:bg-red-50'
-            )}
-          >
-            <Heart className={cn('w-4 h-4', favorited && 'fill-current')} />
-          </button>
+          {/* 自分のサービス → 編集ボタン / 他者のサービス → お気に入りボタン */}
+          {isOwner ? (
+            <button
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); router.push(`/services/${service.id}/edit`) }}
+              className="absolute top-3 right-3 p-2 rounded-full bg-white/80 text-ink-500 hover:text-ink-800 hover:bg-white backdrop-blur-sm transition-all duration-200"
+            >
+              <Pencil className="w-4 h-4" />
+            </button>
+          ) : (
+            <button
+              onClick={toggleFavorite}
+              disabled={loading}
+              className={cn(
+                'absolute top-3 right-3 p-2 rounded-full backdrop-blur-sm transition-all duration-200',
+                favorited
+                  ? 'bg-red-50 text-red-500'
+                  : 'bg-white/80 text-ink-400 hover:text-red-400 hover:bg-red-50'
+              )}
+            >
+              <Heart className={cn('w-4 h-4', favorited && 'fill-current')} />
+            </button>
+          )}
         </div>
 
         {/* Content */}
@@ -111,16 +124,28 @@ export function ServiceCard({ service, currentUserId }: ServiceCardProps) {
           </div>
           <p className="text-sm text-ink-500 line-clamp-2 mb-3">{service.tagline}</p>
 
-          {/* Tags */}
+          {/* カテゴリ */}
+          {(service as any).categories?.length > 0 && (
+            <div className="flex flex-wrap gap-1 mb-2">
+              {getCategoriesByIds((service as any).categories).map((cat) => (
+                <span
+                  key={cat.id}
+                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-cream-100 text-ink-500"
+                >
+                  {cat.emoji} {cat.label}
+                </span>
+              ))}
+            </div>
+          )}
+
+          {/* Tags — クリックで検索へ遷移（カード自体のLink伝播を止める） */}
           {service.tags.length > 0 && (
-            <div className="flex flex-wrap gap-1 mb-3">
+            <div className="flex flex-wrap gap-1 mb-3" onClick={(e) => e.preventDefault()}>
               {service.tags.slice(0, 3).map((tag) => (
-                <Badge key={tag} variant="default">
-                  {tag}
-                </Badge>
+                <TagChip key={tag} variant="clickable" label={tag} />
               ))}
               {service.tags.length > 3 && (
-                <span className="text-xs text-ink-400">+{service.tags.length - 3}</span>
+                <span className="text-xs text-ink-400 self-center">+{service.tags.length - 3}</span>
               )}
             </div>
           )}

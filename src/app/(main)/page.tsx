@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { ArrowRight, Sparkles, Heart } from 'lucide-react'
+import { ArrowRight, Sparkles } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { ServiceCard } from '@/components/service/ServiceCard'
 import { Button } from '@/components/ui/Button'
@@ -19,6 +19,15 @@ export default async function HomePage() {
     `)
     .order('created_at', { ascending: false })
     .limit(12)
+
+  // 総件数を取得（Stats表示用）
+  const [
+    { count: totalServices },
+    { count: totalProfiles },
+  ] = await Promise.all([
+    supabase.from('services').select('*', { count: 'exact', head: true }),
+    supabase.from('profiles').select('*', { count: 'exact', head: true }),
+  ])
 
   // お気に入り状態を取得
   let favoriteServiceIds: string[] = []
@@ -57,25 +66,19 @@ export default async function HomePage() {
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             {user ? (
-              <Link href="/services/new">
-                <Button size="lg">
-                  サービスを投稿する
-                  <ArrowRight className="w-4 h-4" />
-                </Button>
-              </Link>
+              <Button href="/services/new" size="lg">
+                サービスを投稿する
+                <ArrowRight className="w-4 h-4" />
+              </Button>
             ) : (
               <>
-                <Link href="/auth?tab=signup">
-                  <Button size="lg">
-                    無料ではじめる
-                    <ArrowRight className="w-4 h-4" />
-                  </Button>
-                </Link>
-                <Link href="/search">
-                  <Button variant="secondary" size="lg">
-                    サービスを探す
-                  </Button>
-                </Link>
+                <Button href="/auth?tab=signup" size="lg">
+                  無料ではじめる
+                  <ArrowRight className="w-4 h-4" />
+                </Button>
+                <Button href="/search" variant="secondary" size="lg">
+                  サービスを探す
+                </Button>
               </>
             )}
           </div>
@@ -88,13 +91,15 @@ export default async function HomePage() {
           <div className="grid grid-cols-3 gap-4 text-center">
             <div>
               <div className="text-2xl sm:text-3xl font-bold text-ink-800">
-                {servicesWithFav.length}+
+                {totalServices ?? 0}
               </div>
               <div className="text-sm text-ink-500 mt-1">公開サービス</div>
             </div>
             <div>
-              <div className="text-2xl sm:text-3xl font-bold text-ink-800">∞</div>
-              <div className="text-sm text-ink-500 mt-1">可能性</div>
+              <div className="text-2xl sm:text-3xl font-bold text-ink-800">
+                {totalProfiles ?? 0}
+              </div>
+              <div className="text-sm text-ink-500 mt-1">開発者</div>
             </div>
             <div>
               <div className="text-2xl sm:text-3xl font-bold text-ink-800">0円</div>
@@ -137,11 +142,9 @@ export default async function HomePage() {
               まだサービスが投稿されていません
             </h3>
             <p className="text-ink-500 mb-6">最初の投稿者になりましょう！</p>
-            <Link href={user ? '/services/new' : '/auth?tab=signup'}>
-              <Button>
-                {user ? 'サービスを投稿する' : 'はじめる'}
-              </Button>
-            </Link>
+            <Button href={user ? '/services/new' : '/auth?tab=signup'}>
+              {user ? 'サービスを投稿する' : 'はじめる'}
+            </Button>
           </div>
         )}
       </section>
@@ -156,12 +159,10 @@ export default async function HomePage() {
             <p className="text-warm-100 text-lg mb-8">
               NeedLinkで、あなたが作ったサービスを発信しましょう。
             </p>
-            <Link href="/auth?tab=signup">
-              <Button variant="secondary" size="lg">
-                無料で始める
-                <ArrowRight className="w-4 h-4" />
-              </Button>
-            </Link>
+            <Button href="/auth?tab=signup" variant="secondary" size="lg">
+              無料で始める
+              <ArrowRight className="w-4 h-4" />
+            </Button>
           </div>
         </section>
       )}

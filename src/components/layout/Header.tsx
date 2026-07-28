@@ -86,7 +86,7 @@ export function Header({ profile }: HeaderProps) {
                   <div className="absolute right-0 top-full mt-1 w-48 bg-white rounded-xl border border-cream-300 shadow-card opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
                     <div className="p-1">
                       <Link
-                        href={`/users/${profile.username}`}
+                        href={`/users/${profile.slug || profile.username}`}
                         className="flex items-center gap-2 px-3 py-2 text-sm text-ink-700 hover:bg-cream-100 rounded-lg"
                       >
                         <User className="w-4 h-4" />
@@ -161,12 +161,19 @@ export function Header({ profile }: HeaderProps) {
                   投稿する
                 </Link>
                 <Link
-                  href={`/users/${profile.username}`}
+                  href={`/users/${profile.slug || profile.username}`}
                   className="flex items-center gap-2 px-3 py-2.5 text-sm text-ink-700 hover:bg-cream-200 rounded-lg"
                   onClick={() => setMenuOpen(false)}
                 >
                   <User className="w-4 h-4" />
                   プロフィール
+                </Link>
+                <Link
+                  href="/settings/profile"
+                  className="flex items-center gap-2 px-3 py-2.5 text-sm text-ink-700 hover:bg-cream-200 rounded-lg"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  設定
                 </Link>
                 <button
                   onClick={() => { handleSignOut(); setMenuOpen(false) }}

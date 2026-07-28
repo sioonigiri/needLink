@@ -12,7 +12,7 @@ export default async function MainLayout({
 
   let profile = null
   if (user) {
-    const { data } = await (supabase as any)
+    const { data } = await supabase
       .from('profiles')
       .select('*')
       .eq('id', user.id)
