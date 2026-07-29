@@ -9,5 +9,6 @@ export default function robots(): MetadataRoute.Robots {
       disallow: ['/auth', '/favorites', '/settings/', '/services/new', '/services/*/edit'],
     },
     sitemap: `${SITE.url}/sitemap.xml`,
+    host: SITE.url,
   }
 }

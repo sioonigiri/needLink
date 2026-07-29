@@ -1,9 +1,13 @@
+import type { Metadata } from 'next'
 import { Mail } from 'lucide-react'
 import { SITE } from '@/data/site'
 
-export const metadata = {
-  title: 'サポート | NeedLink',
+export const metadata: Metadata = {
+  title: 'サポート',
   description: 'NeedLinkへのお問い合わせ・サポート',
+  alternates: {
+    canonical: '/support',
+  },
 }
 
 export default function SupportPage() {

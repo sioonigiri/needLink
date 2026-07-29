@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
+import type { Metadata } from 'next'
 import { Globe, ShoppingBag, Play, ExternalLink, Heart, Calendar, Pencil } from 'lucide-react'
 import { GithubIcon, XIcon } from '@/components/ui/Icons'
 import { Avatar } from '@/components/ui/Avatar'
@@ -16,6 +17,34 @@ import { FollowButton } from '@/components/profile/FollowButton'
 
 interface ServiceDetailPageProps {
   params: { id: string }
+}
+
+export async function generateMetadata({
+  params,
+}: ServiceDetailPageProps): Promise<Metadata> {
+  const supabase = createClient()
+  const { data } = await supabase
+    .from('services')
+    .select('name, tagline')
+    .eq('id', params.id)
+    .single()
+
+  const service = data as { name?: string; tagline?: string } | null
+  if (!service) return { title: 'サービス' }
+
+  return {
+    title: service.name,
+    description: service.tagline || undefined,
+    alternates: {
+      canonical: `/services/${params.id}`,
+    },
+    openGraph: {
+      title: service.name,
+      description: service.tagline || undefined,
+      url: `/services/${params.id}`,
+      type: 'website',
+    },
+  }
 }
 
 export default async function ServiceDetailPage({ params }: ServiceDetailPageProps) {

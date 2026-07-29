@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
+import type { Metadata } from 'next'
 import { getLinkService } from '@/data/links'
 import { Avatar } from '@/components/ui/Avatar'
 import { Badge } from '@/components/ui/Badge'
@@ -11,6 +12,36 @@ import { ServiceWithProfile } from '@/types'
 
 interface UserProfilePageProps {
   params: { username: string }
+}
+
+export async function generateMetadata({
+  params,
+}: UserProfilePageProps): Promise<Metadata> {
+  const supabase = createClient()
+  const slug = decodeURIComponent(params.username)
+  const { data } = await supabase
+    .from('profiles')
+    .select('username, slug, bio')
+    .eq('slug', slug)
+    .single()
+
+  const profile = data as { username?: string; slug?: string | null; bio?: string | null } | null
+  if (!profile) return { title: 'ユーザー' }
+
+  const handle = profile.slug || profile.username || slug
+  return {
+    title: profile.username,
+    description: profile.bio || `${profile.username}のプロフィール`,
+    alternates: {
+      canonical: `/users/${encodeURIComponent(handle)}`,
+    },
+    openGraph: {
+      title: profile.username,
+      description: profile.bio || undefined,
+      url: `/users/${encodeURIComponent(handle)}`,
+      type: 'profile',
+    },
+  }
 }
 
 export default async function UserProfilePage({ params }: UserProfilePageProps) {

@@ -1,9 +1,16 @@
 import Link from 'next/link'
 import { ArrowRight, Sparkles } from 'lucide-react'
+import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { ServiceCard } from '@/components/service/ServiceCard'
 import { Button } from '@/components/ui/Button'
 import { ServiceWithProfile } from '@/types'
+
+export const metadata: Metadata = {
+  alternates: {
+    canonical: '/',
+  },
+}
 
 export default async function HomePage() {
   const supabase = createClient()

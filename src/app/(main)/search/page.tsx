@@ -1,8 +1,17 @@
 import { Suspense } from 'react'
+import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { ServiceCard } from '@/components/service/ServiceCard'
 import { SearchFilters } from '@/components/service/SearchFilters'
 import { ServiceWithProfile } from '@/types'
+
+export const metadata: Metadata = {
+  title: 'サービスを探す',
+  description: '個人開発者が公開したサービスを検索・発見できます。',
+  alternates: {
+    canonical: '/search',
+  },
+}
 
 interface SearchPageProps {
   searchParams: {
