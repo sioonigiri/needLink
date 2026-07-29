@@ -1,4 +1,5 @@
 import type { MetadataRoute } from 'next'
+import { SITE } from '@/data/site'
 
 export default function robots(): MetadataRoute.Robots {
   return {
@@ -7,6 +8,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: '/',
       disallow: ['/auth', '/favorites', '/settings/', '/services/new', '/services/*/edit'],
     },
-    sitemap: 'https://www.needlinkapp.com/sitemap.xml',
+    sitemap: `${SITE.url}/sitemap.xml`,
   }
 }

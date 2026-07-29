@@ -1,14 +1,26 @@
 import type { Metadata } from 'next'
 import { GoogleAnalytics } from '@next/third-parties/google'
+import { SITE } from '@/data/site'
 import './globals.css'
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE.url),
   title: 'NeedLink - 個人開発者のためのショーケース',
   description: '作ったものが、人と仕事と次のサービスをつなぐ。個人開発者がサービスを公開・発見できるプラットフォーム。',
+  alternates: {
+    canonical: '/',
+  },
   openGraph: {
     title: 'NeedLink',
     description: '個人開発者のためのショーケース',
     type: 'website',
+    url: SITE.url,
+    siteName: SITE.name,
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'NeedLink',
+    description: '個人開発者のためのショーケース',
   },
 }
 
