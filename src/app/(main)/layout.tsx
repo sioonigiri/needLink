@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { Header } from '@/components/layout/Header'
 import { Footer } from '@/components/layout/Footer'
+import { ToastProvider } from '@/components/ui/ToastProvider'
 
 export default async function MainLayout({
   children,
@@ -25,6 +26,7 @@ export default async function MainLayout({
       <Header profile={profile} />
       <main className="flex-1">{children}</main>
       <Footer />
+      <ToastProvider />
     </div>
   )
 }

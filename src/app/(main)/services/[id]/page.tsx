@@ -11,6 +11,7 @@ import { SERVICE_STATUS_LABELS, SERVICE_STATUS_COLORS, ServiceStatus } from '@/t
 import { getCategoriesByIds } from '@/data/categories'
 import { cn, formatDate } from '@/lib/utils'
 import { FavoriteButton } from '@/components/service/FavoriteButton'
+import { DeleteServiceButton } from '@/components/service/DeleteServiceButton'
 import { FollowButton } from '@/components/profile/FollowButton'
 
 interface ServiceDetailPageProps {
@@ -99,14 +100,21 @@ export default async function ServiceDetailPage({ params }: ServiceDetailPagePro
               </h1>
               <p className="text-ink-500 text-lg">{service.tagline}</p>
             </div>
-            {user?.id === service.user_id ? (
-              <Link
-                href={`/services/${service.id}/edit`}
-                className="flex items-center gap-2 px-4 py-2 bg-white border border-cream-300 text-ink-700 hover:bg-cream-100 rounded-xl text-sm font-medium transition-colors"
-              >
-                <Pencil className="w-4 h-4" />
-                編集する
-              </Link>
+            {user && user.id === service.user_id ? (
+              <div className="flex flex-col gap-2.5 shrink-0">
+                <Link
+                  href={`/services/${service.id}/edit`}
+                  className="flex items-center justify-center gap-2 px-4 py-2 bg-white border border-cream-300 text-ink-700 hover:bg-cream-100 rounded-xl text-sm font-medium transition-colors"
+                >
+                  <Pencil className="w-4 h-4" />
+                  編集する
+                </Link>
+                <DeleteServiceButton
+                  serviceId={service.id}
+                  userId={user.id}
+                  redirectTo="/"
+                />
+              </div>
             ) : (
               <FavoriteButton
                 serviceId={service.id}
