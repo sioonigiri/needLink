@@ -21,12 +21,20 @@ npm install
 
 ### 3. 環境変数の設定
 
-`.env.local.example` をコピーして `.env.local` を作成し、Supabaseの値を設定：
+`.env.local.example` をコピーして `.env.local` を作成し、値を設定：
 
 ```
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+NEXT_PUBLIC_GA_MEASUREMENT_ID=G-XXXXXXXXXX
 ```
+
+#### Google Analytics 4（ローカル）
+
+1. [Google Analytics](https://analytics.google.com/) で GA4 プロパティを作成し、測定 ID（`G-XXXXXXXXXX`）を取得する
+2. `.env.local` に `NEXT_PUBLIC_GA_MEASUREMENT_ID` を設定する
+3. GA は **本番環境（`NODE_ENV=production`）のみ** 読み込まれます。ローカル開発中は計測されません
+4. 本番相当で確認する場合は `npm run build && npm run start` を実行してください
 
 ### 4. 開発サーバーの起動
 
@@ -38,8 +46,20 @@ npm run dev
 
 1. GitHubにプッシュ
 2. [Vercel](https://vercel.com) でプロジェクトをインポート
-3. 環境変数を設定
+3. 環境変数を設定（下記参照）
 4. デプロイ
+
+### Vercel の環境変数
+
+Vercel ダッシュボード → Project → **Settings** → **Environment Variables** に以下を追加してください。
+
+| Name | Value | Environment |
+|------|-------|-------------|
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase の Project URL | Production / Preview / Development |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase の anon key | Production / Preview / Development |
+| `NEXT_PUBLIC_GA_MEASUREMENT_ID` | GA4 測定 ID（例: `G-XXXXXXXXXX`） | Production（推奨） |
+
+設定後は再デプロイが必要です。
 
 ## 技術スタック
 
