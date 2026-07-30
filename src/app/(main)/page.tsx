@@ -5,10 +5,12 @@ import { createClient } from '@/lib/supabase/server'
 import { ServiceCard } from '@/components/service/ServiceCard'
 import { Button } from '@/components/ui/Button'
 import { ServiceWithProfile } from '@/types'
+import { SITE } from '@/data/site'
 
 export const metadata: Metadata = {
   alternates: {
-    canonical: '/',
+    // 末尾スラッシュ付きで明示（GSCの正規URL統一用）
+    canonical: `${SITE.url}/`,
   },
 }
 

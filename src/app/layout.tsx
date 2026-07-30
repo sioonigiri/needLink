@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'NeedLink',
     description: '個人開発者が制作したサービスを公開・発見できるプラットフォーム。',
-    url: SITE.url,
+    url: `${SITE.url}/`,
     siteName: SITE.name,
     locale: 'ja_JP',
     type: 'website',

@@ -5,7 +5,7 @@ export function JsonLd() {
     '@context': 'https://schema.org',
     '@type': 'Organization',
     name: SITE.name,
-    url: SITE.url,
+    url: `${SITE.url}/`,
     logo: `${SITE.url}/icon.png`,
     email: SITE.supportEmail,
   }
@@ -14,7 +14,7 @@ export function JsonLd() {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
     name: SITE.name,
-    url: SITE.url,
+    url: `${SITE.url}/`,
     potentialAction: {
       '@type': 'SearchAction',
       target: {
