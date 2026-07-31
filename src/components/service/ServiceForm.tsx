@@ -139,61 +139,56 @@ export function ServiceForm({ userId, initialData }: ServiceFormProps) {
         updated_at: new Date().toISOString(),
       }
 
-      /** categories 未マイグレーション時はカラムなしでリトライ */
-      async function saveWithCategoriesFallback(
-        mode: 'insert' | 'update',
-        payload: typeof serviceData
-      ) {
-        const client = supabase as any
-        if (mode === 'update') {
-          let { error } = await client
-            .from('services')
-            .update(payload)
-            .eq('id', initialData!.id)
-          if (error && /categories/i.test(error.message || '')) {
-            const { categories: _c, ...withoutCategories } = payload
-            ;({ error } = await client
-              .from('services')
-              .update(withoutCategories)
-              .eq('id', initialData!.id))
-          }
-          return { data: error ? null : { id: initialData!.id }, error }
-        }
+      const categoriesMigrationHint =
+        'カテゴリを保存できませんでした。Supabase の SQL Editor で次を実行してください: ' +
+        "ALTER TABLE public.services ADD COLUMN IF NOT EXISTS categories TEXT[] DEFAULT '{}'; " +
+        "NOTIFY pgrst, 'reload schema';"
 
-        let { data: row, error } = await client
-          .from('services')
-          .insert(payload)
-          .select()
-          .single()
-        if (error && /categories/i.test(error.message || '')) {
-          const { categories: _c, ...withoutCategories } = payload
-          ;({ data: row, error } = await client
-            .from('services')
-            .insert(withoutCategories)
-            .select()
-            .single())
-        }
-        return { data: row, error }
+      function formatSaveError(message: string) {
+        if (/categories/i.test(message)) return categoriesMigrationHint
+        return message
       }
 
+      const client = supabase as any
+
       if (initialData?.id) {
-        const { error } = await saveWithCategoriesFallback('update', serviceData)
+        const { data: updated, error } = await client
+          .from('services')
+          .update(serviceData)
+          .eq('id', initialData.id)
+          .select('id, categories')
+          .single()
         if (error) {
-          setSubmitError(`更新に失敗しました: ${error.message}`)
+          setSubmitError(`更新に失敗しました: ${formatSaveError(error.message)}`)
+          return
+        }
+        if (
+          categories.length > 0 &&
+          (!updated?.categories || updated.categories.length === 0)
+        ) {
+          setSubmitError(categoriesMigrationHint)
           return
         }
         router.push(`/services/${initialData.id}`)
       } else {
-        const { data: newService, error } = await saveWithCategoriesFallback(
-          'insert',
-          serviceData
-        )
+        const { data: newService, error } = await client
+          .from('services')
+          .insert(serviceData)
+          .select('id, categories')
+          .single()
         if (error) {
-          setSubmitError(`投稿に失敗しました: ${error.message}`)
+          setSubmitError(`投稿に失敗しました: ${formatSaveError(error.message)}`)
           return
         }
         if (!newService?.id) {
           setSubmitError('投稿に失敗しました。時間をおいて再度お試しください。')
+          return
+        }
+        if (
+          categories.length > 0 &&
+          (!newService.categories || newService.categories.length === 0)
+        ) {
+          setSubmitError(categoriesMigrationHint)
           return
         }
         router.push(`/services/${newService.id}`)
