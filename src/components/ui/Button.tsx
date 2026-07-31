@@ -54,7 +54,8 @@ export function Button(props: Props) {
     )
   }
 
-  const { loading, disabled, ...rest } = props as ButtonProps
+  const { loading, disabled, variant: _v, size: _s, className: _c, children: _ch, ...rest } =
+    props as ButtonProps
   return (
     <button className={cls} disabled={disabled || loading} {...rest}>
       {loading && (

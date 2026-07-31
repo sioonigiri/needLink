@@ -45,6 +45,7 @@ export function ServiceForm({ userId, initialData }: ServiceFormProps) {
   const [screenshots, setScreenshots] = useState<string[]>(initialData?.screenshots || [])
   const [screenshotFiles, setScreenshotFiles] = useState<File[]>([])
   const [submitting, setSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState<string | null>(null)
 
   const {
     register,
@@ -98,12 +99,17 @@ export function ServiceForm({ userId, initialData }: ServiceFormProps) {
 
   async function onSubmit(data: ServiceFormValues) {
     setSubmitting(true)
+    setSubmitError(null)
     const supabase = createClient()
 
     try {
       let thumbnailUrl = initialData?.thumbnail_url || null
       if (thumbnailFile) {
         thumbnailUrl = await uploadImage(thumbnailFile, `${userId}/thumbnails`)
+        if (!thumbnailUrl) {
+          setSubmitError('サムネイルのアップロードに失敗しました。')
+          return
+        }
       }
 
       const screenshotUrls: string[] = []
@@ -133,23 +139,71 @@ export function ServiceForm({ userId, initialData }: ServiceFormProps) {
         updated_at: new Date().toISOString(),
       }
 
-      if (initialData?.id) {
-        await (supabase as any)
+      /** categories 未マイグレーション時はカラムなしでリトライ */
+      async function saveWithCategoriesFallback(
+        mode: 'insert' | 'update',
+        payload: typeof serviceData
+      ) {
+        const client = supabase as any
+        if (mode === 'update') {
+          let { error } = await client
+            .from('services')
+            .update(payload)
+            .eq('id', initialData!.id)
+          if (error && /categories/i.test(error.message || '')) {
+            const { categories: _c, ...withoutCategories } = payload
+            ;({ error } = await client
+              .from('services')
+              .update(withoutCategories)
+              .eq('id', initialData!.id))
+          }
+          return { data: error ? null : { id: initialData!.id }, error }
+        }
+
+        let { data: row, error } = await client
           .from('services')
-          .update(serviceData)
-          .eq('id', initialData.id)
-        router.push(`/services/${initialData.id}`)
-      } else {
-        const { data: newService } = await (supabase as any)
-          .from('services')
-          .insert(serviceData)
+          .insert(payload)
           .select()
           .single()
-        if (newService) router.push(`/services/${newService.id}`)
+        if (error && /categories/i.test(error.message || '')) {
+          const { categories: _c, ...withoutCategories } = payload
+          ;({ data: row, error } = await client
+            .from('services')
+            .insert(withoutCategories)
+            .select()
+            .single())
+        }
+        return { data: row, error }
+      }
+
+      if (initialData?.id) {
+        const { error } = await saveWithCategoriesFallback('update', serviceData)
+        if (error) {
+          setSubmitError(`更新に失敗しました: ${error.message}`)
+          return
+        }
+        router.push(`/services/${initialData.id}`)
+      } else {
+        const { data: newService, error } = await saveWithCategoriesFallback(
+          'insert',
+          serviceData
+        )
+        if (error) {
+          setSubmitError(`投稿に失敗しました: ${error.message}`)
+          return
+        }
+        if (!newService?.id) {
+          setSubmitError('投稿に失敗しました。時間をおいて再度お試しください。')
+          return
+        }
+        router.push(`/services/${newService.id}`)
       }
       router.refresh()
     } catch (err) {
       console.error(err)
+      setSubmitError(
+        err instanceof Error ? err.message : '予期しないエラーが発生しました。'
+      )
     } finally {
       setSubmitting(false)
     }
@@ -397,6 +451,16 @@ export function ServiceForm({ userId, initialData }: ServiceFormProps) {
       </Card>
 
       {/* Submit */}
+      {submitError && (
+        <div className="bg-red-50 border border-red-200 text-red-600 text-sm rounded-nl-input px-4 py-3">
+          {submitError}
+        </div>
+      )}
+      {Object.keys(errors).length > 0 && !submitError && (
+        <div className="bg-red-50 border border-red-200 text-red-600 text-sm rounded-nl-input px-4 py-3">
+          入力内容を確認してください。未入力や形式エラーがある項目があります。
+        </div>
+      )}
       <div className="flex justify-end gap-3">
         <Button
           type="button"

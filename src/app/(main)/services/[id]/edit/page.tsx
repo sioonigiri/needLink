@@ -38,6 +38,7 @@ export default async function EditServicePage({ params }: EditServicePageProps) 
           thumbnail_url: service.thumbnail_url || undefined,
           screenshots: service.screenshots,
           tags: service.tags,
+          categories: service.categories || [],
           github_url: service.github_url || undefined,
           website_url: service.website_url || undefined,
           app_store_url: service.app_store_url || undefined,
