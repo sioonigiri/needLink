@@ -3,7 +3,7 @@ import { ArrowRight, Sparkles } from 'lucide-react'
 import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { ServiceCard } from '@/components/service/ServiceCard'
-import { Button } from '@/components/ui/Button'
+import { Button, EmptyState } from '@/components/ui'
 import { ServiceWithProfile } from '@/types'
 import { SITE } from '@/data/site'
 
@@ -57,18 +57,18 @@ export default async function HomePage() {
   return (
     <div>
       {/* Hero */}
-      <section className="bg-gradient-to-b from-cream-50 to-cream-100 border-b border-cream-200">
+      <section className="bg-gradient-to-b from-white to-nl-bg border-b border-nl-card-border">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-20 sm:py-32 text-center">
-          <div className="inline-flex items-center gap-2 bg-warm-100 text-warm-700 px-4 py-1.5 rounded-full text-sm font-medium mb-8">
+          <div className="inline-flex items-center gap-2 bg-nl-primary/10 text-nl-primary px-4 py-1.5 rounded-full text-sm font-medium mb-8">
             <Sparkles className="w-4 h-4" />
             個人開発者のためのショーケース
           </div>
-          <h1 className="text-4xl sm:text-6xl font-bold text-ink-800 leading-tight mb-6">
+          <h1 className="text-4xl sm:text-6xl font-bold text-nl-text leading-tight mb-6">
             作ったものが、
             <br />
-            <span className="text-warm-500">人と仕事をつなぐ。</span>
+            <span className="text-nl-primary">人と仕事をつなぐ。</span>
           </h1>
-          <p className="text-lg sm:text-xl text-ink-500 max-w-2xl mx-auto mb-10 leading-relaxed">
+          <p className="text-lg sm:text-xl text-nl-muted max-w-2xl mx-auto mb-10 leading-relaxed">
             NeedLinkは、個人開発者がサービスを公開し、
             <br className="hidden sm:block" />
             世界に発信できるプラットフォームです。
@@ -95,24 +95,24 @@ export default async function HomePage() {
       </section>
 
       {/* Stats */}
-      <section className="bg-white border-b border-cream-200">
+      <section className="bg-nl-card border-b border-nl-card-border">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
           <div className="grid grid-cols-3 gap-4 text-center">
             <div>
-              <div className="text-2xl sm:text-3xl font-bold text-ink-800">
+              <div className="text-2xl sm:text-3xl font-bold text-nl-text">
                 {totalServices ?? 0}
               </div>
-              <div className="text-sm text-ink-500 mt-1">公開サービス</div>
+              <div className="text-sm text-nl-muted mt-1">公開サービス</div>
             </div>
             <div>
-              <div className="text-2xl sm:text-3xl font-bold text-ink-800">
+              <div className="text-2xl sm:text-3xl font-bold text-nl-text">
                 {totalProfiles ?? 0}
               </div>
-              <div className="text-sm text-ink-500 mt-1">開発者</div>
+              <div className="text-sm text-nl-muted mt-1">開発者</div>
             </div>
             <div>
-              <div className="text-2xl sm:text-3xl font-bold text-ink-800">0円</div>
-              <div className="text-sm text-ink-500 mt-1">完全無料</div>
+              <div className="text-2xl sm:text-3xl font-bold text-nl-text">0円</div>
+              <div className="text-sm text-nl-muted mt-1">完全無料</div>
             </div>
           </div>
         </div>
@@ -122,12 +122,12 @@ export default async function HomePage() {
       <section className="max-w-6xl mx-auto px-4 sm:px-6 py-16">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h2 className="text-2xl font-bold text-ink-800">最新のサービス</h2>
-            <p className="text-ink-500 mt-1">個人開発者が作った最新作品</p>
+            <h2 className="text-2xl font-bold text-nl-text">最新のサービス</h2>
+            <p className="text-nl-muted mt-1">個人開発者が作った最新作品</p>
           </div>
           <Link
             href="/search"
-            className="flex items-center gap-1.5 text-sm text-warm-600 hover:text-warm-700 font-medium transition-colors"
+            className="flex items-center gap-1.5 text-sm text-nl-primary hover:text-nl-primary-hover font-medium transition-all duration-200"
           >
             すべて見る
             <ArrowRight className="w-4 h-4" />
@@ -145,27 +145,23 @@ export default async function HomePage() {
             ))}
           </div>
         ) : (
-          <div className="text-center py-20 bg-white rounded-2xl border border-cream-200">
-            <div className="text-5xl mb-4">🚀</div>
-            <h3 className="text-lg font-semibold text-ink-700 mb-2">
-              まだサービスが投稿されていません
-            </h3>
-            <p className="text-ink-500 mb-6">最初の投稿者になりましょう！</p>
-            <Button href={user ? '/services/new' : '/auth?tab=signup'}>
-              {user ? 'サービスを投稿する' : 'はじめる'}
-            </Button>
-          </div>
+          <EmptyState
+            title="まだサービスが投稿されていません"
+            description="最初の投稿者になりましょう！"
+            actionLabel={user ? 'サービスを投稿する' : 'はじめる'}
+            actionHref={user ? '/services/new' : '/auth?tab=signup'}
+          />
         )}
       </section>
 
       {/* CTA */}
       {!user && (
-        <section className="bg-warm-500 py-20">
+        <section className="bg-nl-primary py-20">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
             <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
               あなたの作品を世界へ
             </h2>
-            <p className="text-warm-100 text-lg mb-8">
+            <p className="text-white/80 text-lg mb-8">
               NeedLinkで、あなたが作ったサービスを発信しましょう。
             </p>
             <Button href="/auth?tab=signup" variant="secondary" size="lg">

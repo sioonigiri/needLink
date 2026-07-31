@@ -5,7 +5,7 @@ import Image from 'next/image'
 import { Heart, Pencil } from 'lucide-react'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Avatar } from '@/components/ui/Avatar'
+import { Avatar, Card } from '@/components/ui'
 import { TagChip } from '@/components/ui/TagChip'
 import { createClient } from '@/lib/supabase/client'
 import { SERVICE_STATUS_LABELS, SERVICE_STATUS_COLORS, ServiceStatus, ServiceWithProfile } from '@/types'
@@ -57,9 +57,9 @@ export function ServiceCard({ service, currentUserId }: ServiceCardProps) {
 
   return (
     <Link href={`/services/${service.id}`} className="group block">
-      <div className="bg-white rounded-2xl border border-cream-300 shadow-soft hover:shadow-hover hover:-translate-y-0.5 transition-all duration-300 overflow-hidden">
+      <Card className="overflow-hidden transition-all duration-300 hover:shadow-hover hover:-translate-y-0.5">
         {/* Thumbnail */}
-        <div className="relative aspect-[16/9] bg-cream-100 overflow-hidden">
+        <div className="relative aspect-[16/9] bg-nl-beige overflow-hidden">
           {service.thumbnail_url ? (
             <Image
               src={service.thumbnail_url}
@@ -68,8 +68,8 @@ export function ServiceCard({ service, currentUserId }: ServiceCardProps) {
               className="object-cover group-hover:scale-105 transition-transform duration-500"
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-cream-100 to-cream-200">
-              <span className="text-4xl font-bold text-cream-400">
+            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-nl-beige to-nl-card-border">
+              <span className="text-4xl font-bold text-nl-muted/40">
                 {service.name.charAt(0)}
               </span>
             </div>
@@ -89,7 +89,7 @@ export function ServiceCard({ service, currentUserId }: ServiceCardProps) {
           {isOwner ? (
             <button
               onClick={(e) => { e.preventDefault(); e.stopPropagation(); router.push(`/services/${service.id}/edit`) }}
-              className="absolute top-3 right-3 p-2 rounded-full bg-white/80 text-ink-500 hover:text-ink-800 hover:bg-white backdrop-blur-sm transition-all duration-200"
+              className="absolute top-3 right-3 p-2 rounded-full bg-white/80 text-nl-muted hover:text-nl-text hover:bg-white backdrop-blur-sm transition-all duration-200"
             >
               <Pencil className="w-4 h-4" />
             </button>
@@ -101,7 +101,7 @@ export function ServiceCard({ service, currentUserId }: ServiceCardProps) {
                 'absolute top-3 right-3 p-2 rounded-full backdrop-blur-sm transition-all duration-200',
                 favorited
                   ? 'bg-red-50 text-red-500'
-                  : 'bg-white/80 text-ink-400 hover:text-red-400 hover:bg-red-50'
+                  : 'bg-white/80 text-nl-muted hover:text-red-400 hover:bg-red-50'
               )}
             >
               <Heart className={cn('w-4 h-4', favorited && 'fill-current')} />
@@ -112,17 +112,17 @@ export function ServiceCard({ service, currentUserId }: ServiceCardProps) {
         {/* Content */}
         <div className="p-4">
           <div className="flex items-start justify-between gap-2 mb-1">
-            <h3 className="font-semibold text-ink-800 group-hover:text-warm-600 transition-colors line-clamp-1">
+            <h3 className="font-semibold text-nl-text group-hover:text-nl-primary transition-colors line-clamp-1">
               {service.name}
             </h3>
             {favoriteCount > 0 && (
-              <span className="flex items-center gap-1 text-xs text-ink-400 shrink-0">
+              <span className="flex items-center gap-1 text-xs text-nl-muted shrink-0">
                 <Heart className="w-3 h-3 fill-red-400 text-red-400" />
                 {favoriteCount}
               </span>
             )}
           </div>
-          <p className="text-sm text-ink-500 line-clamp-2 mb-3">{service.tagline}</p>
+          <p className="text-sm text-nl-muted line-clamp-2 mb-3">{service.tagline}</p>
 
           {/* カテゴリ */}
           {(service as any).categories?.length > 0 && (
@@ -130,7 +130,7 @@ export function ServiceCard({ service, currentUserId }: ServiceCardProps) {
               {getCategoriesByIds((service as any).categories).map((cat) => (
                 <span
                   key={cat.id}
-                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-cream-100 text-ink-500"
+                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-nl-beige text-nl-muted"
                 >
                   {cat.emoji} {cat.label}
                 </span>
@@ -145,24 +145,24 @@ export function ServiceCard({ service, currentUserId }: ServiceCardProps) {
                 <TagChip key={tag} variant="clickable" label={tag} />
               ))}
               {service.tags.length > 3 && (
-                <span className="text-xs text-ink-400 self-center">+{service.tags.length - 3}</span>
+                <span className="text-xs text-nl-muted self-center">+{service.tags.length - 3}</span>
               )}
             </div>
           )}
 
           {/* Author */}
-          <div className="flex items-center gap-2 pt-3 border-t border-cream-100">
+          <div className="flex items-center gap-2 pt-3 border-t border-nl-card-border">
             <Avatar
               src={service.profile.avatar_url}
               name={service.profile.username}
               size="xs"
             />
-            <span className="text-xs text-ink-500">
+            <span className="text-xs text-nl-muted">
               {service.profile.username}
             </span>
           </div>
         </div>
-      </div>
+      </Card>
     </Link>
   )
 }

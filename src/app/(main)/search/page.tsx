@@ -1,8 +1,10 @@
 import { Suspense } from 'react'
 import type { Metadata } from 'next'
+import { Search } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { ServiceCard } from '@/components/service/ServiceCard'
 import { SearchFilters } from '@/components/service/SearchFilters'
+import { EmptyState, Skeleton } from '@/components/ui'
 import { ServiceWithProfile } from '@/types'
 
 export const metadata: Metadata = {
@@ -92,9 +94,9 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10">
       <Suspense fallback={
-        <div className="mb-8">
-          <div className="h-8 bg-cream-200 rounded-xl w-40 animate-pulse mb-5" />
-          <div className="h-12 bg-cream-200 rounded-xl animate-pulse" />
+        <div className="mb-8 space-y-4">
+          <Skeleton variant="text" className="h-8 w-40" />
+          <Skeleton variant="rectangular" className="h-12 w-full" />
         </div>
       }>
         <SearchFilters
@@ -118,17 +120,17 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
           ))}
         </div>
       ) : (
-        <div className="text-center py-20 bg-white rounded-2xl border border-cream-200">
-          <div className="text-5xl mb-4">🔍</div>
-          <h3 className="text-lg font-semibold text-ink-700 mb-2">
-            {hasActiveFilter ? '検索結果が見つかりませんでした' : 'まだサービスがありません'}
-          </h3>
-          <p className="text-ink-500">
-            {hasActiveFilter
+        <EmptyState
+          icon={<Search className="w-12 h-12 text-nl-border" />}
+          title={hasActiveFilter ? '検索結果が見つかりませんでした' : 'まだサービスがありません'}
+          description={
+            hasActiveFilter
               ? '別のキーワードやタグで試してみてください'
-              : '最初の投稿者になりましょう！'}
-          </p>
-        </div>
+              : '最初の投稿者になりましょう！'
+          }
+          actionLabel={hasActiveFilter ? undefined : 'サービスを投稿する'}
+          actionHref={hasActiveFilter ? undefined : '/services/new'}
+        />
       )}
     </div>
   )

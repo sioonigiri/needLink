@@ -3,6 +3,14 @@
 import { ChevronDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
+/** Input / Select と揃えたトリガー用クラス */
+export const formSelectTriggerClass = cn(
+  'flex w-full h-[52px] items-center justify-between gap-2',
+  'px-4 rounded-[14px] border bg-white',
+  'text-[15px] font-medium text-left transition-all duration-200',
+  'focus:outline-none focus-visible:border-nl-primary focus-visible:shadow-nl-focus'
+)
+
 interface FormAccordionProps {
   label: string
   count?: number
@@ -10,7 +18,13 @@ interface FormAccordionProps {
   onToggle: () => void
   /** アコーディオンの開閉に関わらず常に表示するエリア（選択済みチップなど） */
   chips?: React.ReactNode
-  children: React.ReactNode
+  children?: React.ReactNode
+  className?: string
+  /**
+   * true のときトリガーボタンのみ描画（パネル・チップは親側で描画）
+   * 横並びレイアウト用
+   */
+  triggerOnly?: boolean
 }
 
 export function FormAccordion({
@@ -20,35 +34,50 @@ export function FormAccordion({
   onToggle,
   chips,
   children,
+  className,
+  triggerOnly = false,
 }: FormAccordionProps) {
-  return (
-    <div className="flex flex-col gap-2">
-      {/* トリガーボタン */}
-      <button
-        type="button"
-        onClick={onToggle}
-        className={cn(
-          'flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-sm font-medium transition-colors w-fit',
-          open || (count != null && count > 0)
-            ? 'bg-warm-50 border border-warm-400 text-warm-700'
-            : 'bg-white border border-cream-300 text-ink-600 hover:border-warm-400 hover:text-warm-600'
-        )}
-      >
-        {label}
+  const active = open || (count != null && count > 0)
+
+  const trigger = (
+    <button
+      type="button"
+      onClick={onToggle}
+      aria-expanded={open}
+      className={cn(
+        formSelectTriggerClass,
+        active
+          ? 'bg-nl-primary/10 border-nl-primary text-nl-primary'
+          : 'border-nl-border text-nl-text hover:border-nl-primary hover:text-nl-primary'
+      )}
+    >
+      <span className="flex items-center gap-2 min-w-0">
+        <span className="truncate">{label}</span>
         {count != null && count > 0 && (
-          <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-warm-500 text-white text-[10px] font-bold leading-none">
+          <span className="inline-flex items-center justify-center min-w-5 h-5 px-1 rounded-full bg-nl-primary text-white text-[11px] font-bold leading-none shrink-0">
             {count}
           </span>
         )}
-        <ChevronDown className={cn('w-3.5 h-3.5 transition-transform', open && 'rotate-180')} />
-      </button>
+      </span>
+      <ChevronDown
+        className={cn(
+          'w-4 h-4 shrink-0 text-current transition-transform duration-200',
+          open && 'rotate-180'
+        )}
+      />
+    </button>
+  )
 
-      {/* 常時表示エリア（選択済みチップ） */}
+  if (triggerOnly) {
+    return <div className={className}>{trigger}</div>
+  }
+
+  return (
+    <div className={cn('flex flex-col gap-2', className)}>
+      {trigger}
       {chips}
-
-      {/* 展開エリア */}
-      {open && (
-        <div className="bg-cream-50 rounded-2xl border border-cream-200 p-4">
+      {open && children != null && (
+        <div className="bg-nl-beige rounded-nl-card border border-nl-card-border p-4">
           {children}
         </div>
       )}

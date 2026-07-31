@@ -41,15 +41,15 @@ export function FilterDropdown({
         type="button"
         onClick={onToggle}
         className={cn(
-          'flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-sm font-medium transition-colors',
+          'flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-sm font-medium transition-all duration-200',
           open || (count && count > 0)
-            ? 'bg-warm-50 border border-warm-400 text-warm-700'
-            : 'bg-white border border-cream-300 text-ink-600 hover:border-warm-400 hover:text-warm-600'
+            ? 'bg-nl-primary/10 border border-nl-primary text-nl-primary'
+            : 'bg-white border border-nl-border text-nl-muted hover:border-nl-primary hover:text-nl-primary'
         )}
       >
         {label}
         {count != null && count > 0 && (
-          <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-warm-500 text-white text-[10px] font-bold leading-none">
+          <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-nl-primary text-white text-[10px] font-bold leading-none">
             {count}
           </span>
         )}
@@ -59,7 +59,7 @@ export function FilterDropdown({
       {open && (
         <div
           className={cn(
-            'absolute top-full left-0 mt-2 bg-white rounded-2xl border border-cream-300 shadow-lg z-50 overflow-hidden',
+            'absolute top-full left-0 mt-2 bg-nl-card rounded-nl-card border border-nl-card-border shadow-nl-card z-50 overflow-hidden',
             dropdownClassName ?? 'w-72'
           )}
         >

@@ -3,10 +3,9 @@ import { notFound } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
 import type { Metadata } from 'next'
-import { Globe, ShoppingBag, Play, ExternalLink, Heart, Calendar, Pencil } from 'lucide-react'
+import { Globe, ShoppingBag, Play, ExternalLink, Calendar, Pencil } from 'lucide-react'
 import { GithubIcon, XIcon } from '@/components/ui/Icons'
-import { Avatar } from '@/components/ui/Avatar'
-import { Badge } from '@/components/ui/Badge'
+import { Avatar, Badge, Button, Card } from '@/components/ui'
 import { TagChip } from '@/components/ui/TagChip'
 import { SERVICE_STATUS_LABELS, SERVICE_STATUS_COLORS, ServiceStatus } from '@/types'
 import { getCategoriesByIds } from '@/data/categories'
@@ -98,11 +97,9 @@ export default async function ServiceDetailPage({ params }: ServiceDetailPagePro
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10">
-      {/* Header */}
-      <div className="bg-white rounded-2xl border border-cream-300 shadow-soft overflow-hidden mb-6">
-        {/* Thumbnail */}
+      <Card className="overflow-hidden mb-6">
         {service.thumbnail_url && (
-          <div className="relative aspect-[16/6] bg-cream-100">
+          <div className="relative aspect-[16/6] bg-nl-beige">
             <Image
               src={service.thumbnail_url}
               alt={service.name}
@@ -124,20 +121,17 @@ export default async function ServiceDetailPage({ params }: ServiceDetailPagePro
                   {SERVICE_STATUS_LABELS[status]}
                 </span>
               </div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-ink-800 mb-2">
+              <h1 className="text-2xl sm:text-3xl font-bold text-nl-text mb-2">
                 {service.name}
               </h1>
-              <p className="text-ink-500 text-lg">{service.tagline}</p>
+              <p className="text-nl-muted text-lg">{service.tagline}</p>
             </div>
             {user && user.id === service.user_id ? (
               <div className="flex flex-col gap-2.5 shrink-0">
-                <Link
-                  href={`/services/${service.id}/edit`}
-                  className="flex items-center justify-center gap-2 px-4 py-2 bg-white border border-cream-300 text-ink-700 hover:bg-cream-100 rounded-xl text-sm font-medium transition-colors"
-                >
+                <Button href={`/services/${service.id}/edit`} variant="secondary" size="sm">
                   <Pencil className="w-4 h-4" />
                   編集する
-                </Link>
+                </Button>
                 <DeleteServiceButton
                   serviceId={service.id}
                   userId={user.id}
@@ -154,7 +148,6 @@ export default async function ServiceDetailPage({ params }: ServiceDetailPagePro
             )}
           </div>
 
-          {/* Tags */}
           {service.tags?.length > 0 && (
             <div className="flex flex-wrap gap-2 mt-4">
               {service.tags.map((tag: string) => (
@@ -163,14 +156,13 @@ export default async function ServiceDetailPage({ params }: ServiceDetailPagePro
             </div>
           )}
 
-          {/* Categories */}
           {service.categories?.length > 0 && (
             <div className="flex flex-wrap gap-2 mt-3">
               {getCategoriesByIds(service.categories).map((cat) => (
                 <Link
                   key={cat.id}
                   href={`/search?categories=${cat.id}`}
-                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm bg-cream-100 text-ink-600 hover:bg-warm-100 hover:text-warm-700 transition-colors"
+                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm bg-nl-beige text-nl-muted hover:bg-nl-primary/10 hover:text-nl-primary transition-all duration-200"
                 >
                   {cat.emoji} {cat.label}
                 </Link>
@@ -178,7 +170,6 @@ export default async function ServiceDetailPage({ params }: ServiceDetailPagePro
             </div>
           )}
 
-          {/* Links */}
           {links.length > 0 && (
             <div className="flex flex-wrap gap-3 mt-6">
               {links.map(({ icon: Icon, label, url }) => (
@@ -187,43 +178,40 @@ export default async function ServiceDetailPage({ params }: ServiceDetailPagePro
                   href={url!}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 px-4 py-2 bg-cream-100 hover:bg-cream-200 text-ink-700 text-sm font-medium rounded-xl transition-colors"
+                  className="flex items-center gap-2 px-4 py-2 bg-nl-beige hover:bg-nl-card-border text-nl-text text-sm font-medium rounded-nl-input transition-all duration-200"
                 >
                   <Icon className="w-4 h-4" />
                   {label}
-                  <ExternalLink className="w-3 h-3 text-ink-400" />
+                  <ExternalLink className="w-3 h-3 text-nl-muted" />
                 </a>
               ))}
             </div>
           )}
 
-          <p className="text-xs text-ink-400 mt-6 flex items-center gap-1.5">
+          <p className="text-xs text-nl-muted mt-6 flex items-center gap-1.5">
             <Calendar className="w-3.5 h-3.5" />
             {formatDate(service.created_at)}
           </p>
         </div>
-      </div>
+      </Card>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Main content */}
         <div className="lg:col-span-2 space-y-6">
-          {/* Description */}
           {service.description && (
-            <div className="bg-white rounded-2xl border border-cream-300 p-6 sm:p-8">
-              <h2 className="font-semibold text-ink-800 text-lg mb-4">説明</h2>
-              <p className="text-ink-600 leading-relaxed whitespace-pre-wrap">
+            <Card className="p-6 sm:p-8">
+              <h2 className="font-semibold text-nl-text text-lg mb-4">説明</h2>
+              <p className="text-nl-muted leading-relaxed whitespace-pre-wrap">
                 {service.description}
               </p>
-            </div>
+            </Card>
           )}
 
-          {/* Screenshots */}
           {service.screenshots?.length > 0 && (
-            <div className="bg-white rounded-2xl border border-cream-300 p-6 sm:p-8">
-              <h2 className="font-semibold text-ink-800 text-lg mb-4">スクリーンショット</h2>
+            <Card className="p-6 sm:p-8">
+              <h2 className="font-semibold text-nl-text text-lg mb-4">スクリーンショット</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {service.screenshots.map((src: string, i: number) => (
-                  <div key={i} className="relative aspect-video rounded-xl overflow-hidden bg-cream-100">
+                  <div key={i} className="relative aspect-video rounded-nl-input overflow-hidden bg-nl-beige">
                     <Image
                       src={src}
                       alt={`スクリーンショット${i + 1}`}
@@ -233,14 +221,13 @@ export default async function ServiceDetailPage({ params }: ServiceDetailPagePro
                   </div>
                 ))}
               </div>
-            </div>
+            </Card>
           )}
         </div>
 
-        {/* Sidebar - Author */}
         <div className="space-y-4">
-          <div className="bg-white rounded-2xl border border-cream-300 p-5">
-            <h3 className="text-sm font-semibold text-ink-500 uppercase tracking-wider mb-4">
+          <Card className="p-5">
+            <h3 className="text-sm font-semibold text-nl-muted uppercase tracking-wider mb-4">
               作者
             </h3>
             <Link
@@ -253,14 +240,14 @@ export default async function ServiceDetailPage({ params }: ServiceDetailPagePro
                 size="md"
               />
               <div>
-                <div className="font-semibold text-ink-800">
+                <div className="font-semibold text-nl-text">
                   {profile.username}
                 </div>
-                <div className="text-sm text-ink-500">@{profile.username}</div>
+                <div className="text-sm text-nl-muted">@{profile.username}</div>
               </div>
             </Link>
             {profile.bio && (
-              <p className="text-sm text-ink-600 mt-3 leading-relaxed">{profile.bio}</p>
+              <p className="text-sm text-nl-muted mt-3 leading-relaxed">{profile.bio}</p>
             )}
             {profile.tech_tags?.length > 0 && (
               <div className="flex flex-wrap gap-1.5 mt-3">
@@ -277,23 +264,24 @@ export default async function ServiceDetailPage({ params }: ServiceDetailPagePro
                   initialFollowing={isFollowing}
                 />
               )}
-              <Link
+              <Button
                 href={`/users/${profile.slug || profile.username}`}
-                className="flex-1 text-center px-3 py-2 text-sm text-ink-600 hover:bg-cream-100 rounded-xl border border-cream-300 transition-colors"
+                variant="secondary"
+                size="sm"
+                className="flex-1 rounded-nl-input"
               >
                 プロフィールを見る
-              </Link>
+              </Button>
             </div>
 
-            {/* Social links */}
             {(profile.github_url || profile.twitter_url || profile.website_url) && (
-              <div className="flex gap-2 mt-3 pt-3 border-t border-cream-200">
+              <div className="flex gap-2 mt-3 pt-3 border-t border-nl-card-border">
                 {profile.github_url && (
                   <a
                     href={profile.github_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="p-2 text-ink-500 hover:text-ink-700 hover:bg-cream-100 rounded-lg transition-colors"
+                    className="p-2 text-nl-muted hover:text-nl-text hover:bg-nl-beige rounded-lg transition-all duration-200"
                   >
                     <GithubIcon size={16} />
                   </a>
@@ -303,7 +291,7 @@ export default async function ServiceDetailPage({ params }: ServiceDetailPagePro
                     href={profile.twitter_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="p-2 text-ink-500 hover:text-ink-700 hover:bg-cream-100 rounded-lg transition-colors"
+                    className="p-2 text-nl-muted hover:text-nl-text hover:bg-nl-beige rounded-lg transition-all duration-200"
                   >
                     <XIcon size={16} />
                   </a>
@@ -313,15 +301,14 @@ export default async function ServiceDetailPage({ params }: ServiceDetailPagePro
                     href={profile.website_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="p-2 text-ink-500 hover:text-ink-700 hover:bg-cream-100 rounded-lg transition-colors"
+                    className="p-2 text-nl-muted hover:text-nl-text hover:bg-nl-beige rounded-lg transition-all duration-200"
                   >
                     <Globe className="w-4 h-4" />
                   </a>
                 )}
               </div>
             )}
-          </div>
-
+          </Card>
         </div>
       </div>
     </div>

@@ -40,12 +40,12 @@ type TagChipProps =
   | TagChipRemovableProps
   | TagChipFilterProps
 
-const baseChip = 'inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium transition-colors'
+const baseChip = 'inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium transition-all duration-200'
 
 export function TagChip(props: TagChipProps) {
   if (props.variant === 'display') {
     return (
-      <span className={cn(baseChip, 'bg-cream-200 text-ink-600', props.className)}>
+      <span className={cn(baseChip, 'bg-nl-beige text-nl-muted', props.className)}>
         {props.label}
       </span>
     )
@@ -62,7 +62,7 @@ export function TagChip(props: TagChipProps) {
         href={href}
         className={cn(
           baseChip,
-          'bg-cream-200 text-ink-600 hover:bg-warm-100 hover:text-warm-700 cursor-pointer',
+          'bg-nl-beige text-nl-muted hover:bg-nl-primary/10 hover:text-nl-primary cursor-pointer',
           props.className
         )}
       >
@@ -73,12 +73,12 @@ export function TagChip(props: TagChipProps) {
 
   if (props.variant === 'removable') {
     return (
-      <span className={cn(baseChip, 'bg-cream-200 text-ink-700 pr-1.5', props.className)}>
+      <span className={cn(baseChip, 'bg-nl-beige text-nl-text pr-1.5', props.className)}>
         {props.label}
         <button
           type="button"
           onClick={props.onRemove}
-          className="ml-0.5 rounded-full p-0.5 hover:bg-cream-400 transition-colors"
+          className="ml-0.5 rounded-full p-0.5 hover:bg-nl-card-border transition-all duration-200"
           aria-label={`${props.label} を削除`}
         >
           <X className="w-3 h-3" />
@@ -87,14 +87,13 @@ export function TagChip(props: TagChipProps) {
     )
   }
 
-  // filter variant
   return (
-    <span className={cn(baseChip, 'bg-warm-100 text-warm-700 border border-warm-200 pr-1.5', props.className)}>
+    <span className={cn(baseChip, 'bg-nl-primary/10 text-nl-primary border border-nl-primary/20 pr-1.5', props.className)}>
       {props.label}
       <button
         type="button"
         onClick={props.onRemove}
-        className="ml-0.5 rounded-full p-0.5 hover:bg-warm-200 transition-colors"
+        className="ml-0.5 rounded-full p-0.5 hover:bg-nl-primary/20 transition-all duration-200"
         aria-label={`${props.label} フィルタを解除`}
       >
         <X className="w-3 h-3" />

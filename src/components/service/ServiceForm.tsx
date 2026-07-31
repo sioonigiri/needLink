@@ -5,11 +5,10 @@ import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Upload, X, Loader2 } from 'lucide-react'
+import { Upload, X, Loader2, ChevronDown } from 'lucide-react'
 import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
-import { Button } from '@/components/ui/Button'
-import { Input, Textarea } from '@/components/ui/Input'
+import { Button, Card, Input, Textarea } from '@/components/ui'
 import { TagAutocomplete } from '@/components/ui/TagAutocomplete'
 import { FormAccordion } from '@/components/ui/FormAccordion'
 import { TagChip } from '@/components/ui/TagChip'
@@ -159,8 +158,8 @@ export function ServiceForm({ userId, initialData }: ServiceFormProps) {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
       {/* 基本情報 */}
-      <section className="bg-white rounded-2xl border border-cream-300 p-6 space-y-5">
-        <h2 className="font-semibold text-ink-800 text-lg">基本情報</h2>
+      <Card className="p-6 space-y-5">
+        <h2 className="font-semibold text-nl-text text-lg">基本情報</h2>
         <Input
           label="サービス名 *"
           placeholder=""
@@ -181,127 +180,146 @@ export function ServiceForm({ userId, initialData }: ServiceFormProps) {
           error={errors.description?.message}
           {...register('description')}
         />
-        {/* タグ（アコーディオン） */}
-        <FormAccordion
-          label="タグを選択"
-          count={tags.length}
-          open={tagAccOpen}
-          onToggle={() => setTagAccOpen((v) => !v)}
-          chips={
-            tags.length > 0 && !tagAccOpen ? (
-              <div className="flex flex-wrap gap-1.5">
-                {tags.map((tag) => (
-                  <TagChip
-                    key={tag}
-                    variant="removable"
-                    label={tag}
-                    onRemove={() => setTags((prev) => prev.filter((t) => t !== tag))}
-                  />
-                ))}
-              </div>
-            ) : undefined
-          }
-        >
-          <TagAutocomplete
-            value={tags}
-            onChange={setTags}
-            hideChips
-            hint="技術スタックや特徴を追加してください（最大10個）"
-          />
-        </FormAccordion>
+        {/* タグ / カテゴリ / 開発状況 — PC 3列 */}
+        <div className="space-y-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            <FormAccordion
+              label="タグを選択"
+              count={tags.length}
+              open={tagAccOpen}
+              onToggle={() => setTagAccOpen((v) => !v)}
+              triggerOnly
+            />
+            <FormAccordion
+              label="カテゴリを選択"
+              count={categories.length}
+              open={catAccOpen}
+              onToggle={() => setCatAccOpen((v) => !v)}
+              triggerOnly
+            />
+            <div className="relative">
+              <select
+                aria-label="開発状況"
+                className={cn(
+                  'w-full h-[52px] appearance-none rounded-[14px] border bg-white',
+                  'border-nl-border pl-4 pr-10',
+                  'text-[15px] font-medium text-nl-text',
+                  'transition-all duration-200 outline-none',
+                  'hover:border-nl-primary',
+                  'focus:border-nl-primary focus:shadow-nl-focus'
+                )}
+                {...register('status')}
+              >
+                <option value="developing">開発中</option>
+                <option value="beta">ベータ</option>
+                <option value="published">公開中</option>
+                <option value="paused">休止中</option>
+              </select>
+              <ChevronDown className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-nl-muted" />
+            </div>
+          </div>
 
-        {/* カテゴリ（アコーディオン） */}
-        <FormAccordion
-          label="カテゴリを選択"
-          count={categories.length}
-          open={catAccOpen}
-          onToggle={() => setCatAccOpen((v) => !v)}
-          chips={
-            categories.length > 0 && !catAccOpen ? (
-              <div className="flex flex-wrap gap-2">
-                {getCategoriesByIds(categories).map((cat) => (
-                  <span
-                    key={cat.id}
-                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm bg-warm-100 text-warm-700"
-                  >
-                    {cat.emoji} {cat.label}
-                    <button
-                      type="button"
-                      onClick={() => setCategories((prev) => prev.filter((c) => c !== cat.id))}
-                      className="text-warm-500 hover:text-warm-700 leading-none"
-                    >
-                      ×
-                    </button>
-                  </span>
-                ))}
-              </div>
-            ) : undefined
-          }
-        >
-          <div className="flex flex-wrap gap-2">
-            {SERVICE_CATEGORIES.map((cat) => {
-              const selected = categories.includes(cat.id)
-              return (
-                <button
+          {/* 選択済みチップ（閉じているとき） */}
+          {tags.length > 0 && !tagAccOpen && (
+            <div className="flex flex-wrap gap-1.5">
+              {tags.map((tag) => (
+                <TagChip
+                  key={tag}
+                  variant="removable"
+                  label={tag}
+                  onRemove={() => setTags((prev) => prev.filter((t) => t !== tag))}
+                />
+              ))}
+            </div>
+          )}
+          {categories.length > 0 && !catAccOpen && (
+            <div className="flex flex-wrap gap-2">
+              {getCategoriesByIds(categories).map((cat) => (
+                <span
                   key={cat.id}
-                  type="button"
-                  onClick={() =>
-                    setCategories((prev) =>
-                      selected ? prev.filter((c) => c !== cat.id) : [...prev, cat.id]
-                    )
-                  }
-                  className={cn(
-                    'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-colors',
-                    selected
-                      ? 'bg-warm-500 text-white'
-                      : 'bg-white border border-cream-200 text-ink-600 hover:border-warm-400 hover:text-warm-600'
-                  )}
+                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm bg-nl-primary/10 text-nl-primary"
                 >
                   {cat.emoji} {cat.label}
-                </button>
-              )
-            })}
-          </div>
-        </FormAccordion>        <div>
-          <label className="text-sm font-medium text-ink-700 block mb-1.5">開発状況</label>
-          <select
-            className="w-full px-3.5 py-2.5 rounded-xl border border-cream-400 focus:border-warm-400 focus:ring-2 focus:ring-warm-400/20 outline-none bg-white text-ink-800"
-            {...register('status')}
-          >
-            <option value="developing">開発中</option>
-            <option value="beta">ベータ</option>
-            <option value="published">公開中</option>
-            <option value="paused">休止中</option>
-          </select>
+                  <button
+                    type="button"
+                    onClick={() => setCategories((prev) => prev.filter((c) => c !== cat.id))}
+                    className="text-nl-primary hover:text-nl-primary leading-none"
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
+
+          {/* 展開パネル（横幅いっぱい） */}
+          {tagAccOpen && (
+            <div className="bg-nl-beige rounded-nl-card border border-nl-card-border p-4">
+              <TagAutocomplete
+                value={tags}
+                onChange={setTags}
+                hideChips
+                hint="技術スタックや特徴を追加してください（最大10個）"
+              />
+            </div>
+          )}
+          {catAccOpen && (
+            <div className="bg-nl-beige rounded-nl-card border border-nl-card-border p-4">
+              <div className="flex flex-wrap gap-2">
+                {SERVICE_CATEGORIES.map((cat) => {
+                  const selected = categories.includes(cat.id)
+                  return (
+                    <button
+                      key={cat.id}
+                      type="button"
+                      onClick={() =>
+                        setCategories((prev) =>
+                          selected ? prev.filter((c) => c !== cat.id) : [...prev, cat.id]
+                        )
+                      }
+                      className={cn(
+                        'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-colors',
+                        selected
+                          ? 'bg-nl-primary text-white'
+                          : 'bg-white border border-nl-card-border text-nl-muted hover:border-nl-primary hover:text-nl-primary'
+                      )}
+                    >
+                      {cat.emoji} {cat.label}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          )}
         </div>
-      </section>
+      </Card>
 
       {/* メディア */}
-      <section className="bg-white rounded-2xl border border-cream-300 p-6 space-y-5">
-        <h2 className="font-semibold text-ink-800 text-lg">メディア</h2>
+      <Card className="p-6 space-y-5">
+        <h2 className="font-semibold text-nl-text text-lg">メディア</h2>
 
         {/* Thumbnail */}
         <div>
-          <label className="text-sm font-medium text-ink-700 block mb-1.5">
+          <label className="text-sm font-medium text-nl-text block mb-1.5">
             サムネイル
           </label>
           <div className="relative">
             {thumbnail ? (
-              <div className="relative aspect-[16/9] rounded-xl overflow-hidden bg-cream-100">
+              <div className="relative aspect-[16/9] rounded-nl-input overflow-hidden bg-nl-beige">
                 <Image src={thumbnail} alt="サムネイル" fill className="object-cover" />
                 <button
                   type="button"
                   onClick={() => { setThumbnail(null); setThumbnailFile(null) }}
-                  className="absolute top-2 right-2 p-1.5 bg-white/80 rounded-full hover:bg-white transition-colors"
+                  className="absolute top-2 right-2 p-1.5 bg-white/80 rounded-full hover:bg-white transition-all duration-200"
                 >
-                  <X className="w-4 h-4 text-ink-600" />
+                  <X className="w-4 h-4 text-nl-muted" />
                 </button>
               </div>
             ) : (
-              <label className="flex flex-col items-center justify-center aspect-[16/9] rounded-xl border-2 border-dashed border-cream-300 hover:border-warm-300 cursor-pointer transition-colors bg-cream-50 hover:bg-warm-50">
-                <Upload className="w-8 h-8 text-ink-300 mb-2" />
-                <span className="text-sm text-ink-400">クリックして画像をアップロード</span>
-                <span className="text-xs text-ink-300 mt-1">PNG, JPG, WebP (最大5MB)</span>
+              <label className="flex flex-col items-center justify-center aspect-[16/9] rounded-nl-input border-2 border-dashed border-nl-card-border hover:border-nl-primary/40 cursor-pointer transition-all duration-200 bg-nl-beige/50 hover:bg-nl-beige">
+                <Upload className="w-8 h-8 text-nl-muted/50 mb-2" />
+                <span className="text-sm text-nl-muted">クリックして画像をアップロード</span>
+                <span className="text-xs text-nl-muted/60 mt-1">PNG, JPG, WebP (最大5MB)</span>
                 <input
                   type="file"
                   className="hidden"
@@ -315,27 +333,27 @@ export function ServiceForm({ userId, initialData }: ServiceFormProps) {
 
         {/* Screenshots */}
         <div>
-          <label className="text-sm font-medium text-ink-700 block mb-1.5">
+          <label className="text-sm font-medium text-nl-text block mb-1.5">
             スクリーンショット
-            <span className="text-xs text-ink-400 ml-2 font-normal">最大6枚</span>
+            <span className="text-xs text-nl-muted ml-2 font-normal">最大6枚</span>
           </label>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {screenshots.map((src, i) => (
-              <div key={i} className="relative aspect-video rounded-xl overflow-hidden bg-cream-100">
+              <div key={i} className="relative aspect-video rounded-nl-input overflow-hidden bg-nl-beige">
                 <Image src={src} alt={`スクリーンショット${i + 1}`} fill className="object-cover" />
                 <button
                   type="button"
                   onClick={() => removeScreenshot(i)}
-                  className="absolute top-1.5 right-1.5 p-1 bg-white/80 rounded-full hover:bg-white transition-colors"
+                  className="absolute top-1.5 right-1.5 p-1 bg-white/80 rounded-full hover:bg-white transition-all duration-200"
                 >
-                  <X className="w-3 h-3 text-ink-600" />
+                  <X className="w-3 h-3 text-nl-muted" />
                 </button>
               </div>
             ))}
             {screenshots.length < 6 && (
-              <label className="flex flex-col items-center justify-center aspect-video rounded-xl border-2 border-dashed border-cream-300 hover:border-warm-300 cursor-pointer transition-colors bg-cream-50 hover:bg-warm-50">
-                <Upload className="w-5 h-5 text-ink-300 mb-1" />
-                <span className="text-xs text-ink-400">追加</span>
+              <label className="flex flex-col items-center justify-center aspect-video rounded-nl-input border-2 border-dashed border-nl-card-border hover:border-nl-primary/40 cursor-pointer transition-all duration-200 bg-nl-beige/50 hover:bg-nl-beige">
+                <Upload className="w-5 h-5 text-nl-muted/50 mb-1" />
+                <span className="text-xs text-nl-muted">追加</span>
                 <input
                   type="file"
                   className="hidden"
@@ -347,11 +365,11 @@ export function ServiceForm({ userId, initialData }: ServiceFormProps) {
             )}
           </div>
         </div>
-      </section>
+      </Card>
 
       {/* リンク */}
-      <section className="bg-white rounded-2xl border border-cream-300 p-6 space-y-5">
-        <h2 className="font-semibold text-ink-800 text-lg">リンク</h2>
+      <Card className="p-6 space-y-5">
+        <h2 className="font-semibold text-nl-text text-lg">リンク</h2>
         <Input
           label="Webサイト"
           placeholder=""
@@ -376,7 +394,7 @@ export function ServiceForm({ userId, initialData }: ServiceFormProps) {
           error={errors.google_play_url?.message}
           {...register('google_play_url')}
         />
-      </section>
+      </Card>
 
       {/* Submit */}
       <div className="flex justify-end gap-3">

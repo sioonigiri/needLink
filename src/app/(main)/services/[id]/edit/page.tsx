@@ -25,8 +25,8 @@ export default async function EditServicePage({ params }: EditServicePageProps) 
   return (
     <div className="max-w-2xl mx-auto px-4 sm:px-6 py-10">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-ink-800">サービスを編集</h1>
-        <p className="text-ink-500 mt-1">{service.name}</p>
+        <h1 className="text-2xl font-bold text-nl-text">サービスを編集</h1>
+        <p className="text-nl-muted mt-1">{service.name}</p>
       </div>
       <ServiceForm
         userId={user.id}

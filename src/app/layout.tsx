@@ -65,7 +65,7 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="bg-cream-100 text-ink-800 min-h-screen antialiased">
+      <body className="bg-nl-bg text-nl-text min-h-screen antialiased">
         <JsonLd />
         {children}
         {process.env.NODE_ENV === 'production' && gaId && (

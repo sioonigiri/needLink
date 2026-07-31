@@ -130,7 +130,7 @@ export function TagAutocomplete({
   return (
     <div className="flex flex-col gap-1.5" ref={containerRef}>
       {label && (
-        <label className="text-sm font-medium text-ink-700">{label}</label>
+        <label className="text-sm font-medium text-nl-text">{label}</label>
       )}
 
       {/* 追加済みタグ */}
@@ -152,11 +152,11 @@ export function TagAutocomplete({
         <div className="relative">
           <div
             className={cn(
-              'flex items-center gap-2 w-full px-3 py-2.5 rounded-xl border bg-white',
+              'flex items-center gap-2 w-full px-3 py-2.5 rounded-nl-input border bg-white',
               'transition-all duration-200',
               open
-                ? 'border-warm-400 ring-2 ring-warm-400/20'
-                : 'border-cream-400',
+                ? 'border-nl-primary shadow-nl-focus'
+                : 'border-nl-border',
               error && 'border-red-400 focus-within:border-red-400',
             )}
             onClick={() => {
@@ -164,7 +164,7 @@ export function TagAutocomplete({
               setOpen(true)
             }}
           >
-            <Search className="w-4 h-4 text-ink-300 shrink-0" />
+            <Search className="w-4 h-4 text-nl-muted/60 shrink-0" />
             <input
               ref={inputRef}
               value={input}
@@ -173,7 +173,7 @@ export function TagAutocomplete({
               onFocus={() => setOpen(true)}
               placeholder={placeholder}
               autoComplete="off"
-              className="flex-1 outline-none text-sm text-ink-800 placeholder:text-ink-300 bg-transparent"
+              className="flex-1 outline-none text-sm text-nl-text placeholder:text-nl-muted/60 bg-transparent"
               aria-haspopup="listbox"
               aria-expanded={open}
               aria-autocomplete="list"
@@ -187,7 +187,7 @@ export function TagAutocomplete({
                   setActiveIndex(-1)
                   inputRef.current?.focus()
                 }}
-                className="text-ink-300 hover:text-ink-500 transition-colors"
+                className="text-nl-muted/60 hover:text-nl-muted transition-colors"
                 aria-label="入力をクリア"
               >
                 ✕
@@ -199,8 +199,8 @@ export function TagAutocomplete({
           {showDropdown && (
             <div
               className={cn(
-                'absolute z-50 mt-1.5 w-full bg-white rounded-2xl border border-cream-200',
-                'shadow-lg shadow-ink-800/5 max-h-72 overflow-y-auto',
+                'absolute z-50 mt-1.5 w-full bg-white rounded-nl-card border border-nl-card-border',
+                'shadow-lg shadow-nl-card max-h-72 overflow-y-auto',
               )}
             >
               {hasOptions ? (
@@ -209,7 +209,7 @@ export function TagAutocomplete({
                     const offset = getCategoryOffset(catIdx)
                     return (
                       <li key={cat.id}>
-                        <div className="px-3.5 pt-3 pb-1 text-[10px] font-semibold text-ink-400 uppercase tracking-wider">
+                        <div className="px-3.5 pt-3 pb-1 text-[10px] font-semibold text-nl-muted uppercase tracking-wider">
                           {cat.label}
                         </div>
                         <ul>
@@ -223,8 +223,8 @@ export function TagAutocomplete({
                                   className={cn(
                                     'w-full text-left px-3.5 py-2 text-sm transition-colors',
                                     isActive
-                                      ? 'bg-warm-50 text-warm-700'
-                                      : 'text-ink-700 hover:bg-cream-50',
+                                      ? 'bg-nl-primary/10 text-nl-primary'
+                                      : 'text-nl-text hover:bg-nl-beige',
                                   )}
                                   onMouseEnter={() => setActiveIndex(flatIdx)}
                                   onMouseDown={(e) => {
@@ -243,7 +243,7 @@ export function TagAutocomplete({
                   })}
                 </ul>
               ) : (
-                <div className="px-4 py-6 text-center text-sm text-ink-400">
+                <div className="px-4 py-6 text-center text-sm text-nl-muted">
                   「{input}」に一致するタグが見つかりません
                 </div>
               )}
@@ -253,13 +253,13 @@ export function TagAutocomplete({
       )}
 
       {isAtMax && (
-        <p className="text-xs text-ink-400">
+        <p className="text-xs text-nl-muted">
           タグの上限（{maxTags}個）に達しました
         </p>
       )}
 
       {error && <p className="text-xs text-red-500">{error}</p>}
-      {hint && !error && <p className="text-xs text-ink-400">{hint}</p>}
+      {hint && !error && <p className="text-xs text-nl-muted">{hint}</p>}
     </div>
   )
 }

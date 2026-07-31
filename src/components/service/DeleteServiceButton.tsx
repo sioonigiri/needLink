@@ -2,15 +2,14 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Trash2, Loader2 } from 'lucide-react'
+import { Trash2 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { setFlashToast } from '@/components/ui/ToastProvider'
-import { cn } from '@/lib/utils'
+import { Button, Dialog } from '@/components/ui'
 
 interface DeleteServiceButtonProps {
   serviceId: string
   userId: string
-  /** 削除後の遷移先（ユーザートップ＝ホーム） */
   redirectTo?: string
 }
 
@@ -56,64 +55,29 @@ export function DeleteServiceButton({
 
   return (
     <>
-      <button
+      <Button
         type="button"
+        variant="danger"
+        size="sm"
+        className="bg-white text-red-600 border border-red-200 hover:bg-red-50 hover:text-red-700 hover:shadow-none"
         onClick={() => { setOpen(true); setError(null) }}
-        className="flex items-center gap-2 px-4 py-2 bg-white border border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 rounded-xl text-sm font-medium transition-colors"
       >
         <Trash2 className="w-4 h-4" />
         削除する
-      </button>
+      </Button>
 
-      {open && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="delete-dialog-title"
-        >
-          <div
-            className="absolute inset-0 bg-ink-800/40 backdrop-blur-sm"
-            onClick={() => !deleting && setOpen(false)}
-          />
-          <div className="relative bg-white rounded-2xl border border-cream-300 shadow-xl max-w-md w-full p-6 sm:p-7">
-            <h2 id="delete-dialog-title" className="text-lg font-bold text-ink-800 mb-2">
-              サービスを削除
-            </h2>
-            <p className="text-ink-500 text-sm leading-relaxed mb-6">
-              このサービスを削除しますか？この操作は取り消せません。
-            </p>
-
-            {error && (
-              <p className="text-sm text-red-600 bg-red-50 border border-red-100 rounded-xl px-3 py-2 mb-4">
-                {error}
-              </p>
-            )}
-
-            <div className="flex justify-end gap-3">
-              <button
-                type="button"
-                disabled={deleting}
-                onClick={() => setOpen(false)}
-                className="px-4 py-2 rounded-xl text-sm font-medium text-ink-600 bg-cream-100 hover:bg-cream-200 border border-cream-300 transition-colors disabled:opacity-50"
-              >
-                キャンセル
-              </button>
-              <button
-                type="button"
-                disabled={deleting}
-                onClick={handleDelete}
-                className={cn(
-                  'flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-white bg-red-500 hover:bg-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
-                )}
-              >
-                {deleting && <Loader2 className="w-4 h-4 animate-spin" />}
-                削除する
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <Dialog
+        open={open}
+        onClose={() => setOpen(false)}
+        onConfirm={handleDelete}
+        title="サービスを削除"
+        description="このサービスを削除しますか？この操作は取り消せません。"
+        confirmLabel="削除する"
+        cancelLabel="キャンセル"
+        variant="danger"
+        loading={deleting}
+        error={error}
+      />
     </>
   )
 }

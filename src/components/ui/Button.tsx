@@ -3,25 +3,28 @@ import Link from 'next/link'
 import { cn } from '@/lib/utils'
 
 const baseClasses =
-  'inline-flex items-center justify-center gap-2 font-medium rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-warm-400 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed'
+  'inline-flex items-center justify-center gap-2 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-nl-primary/30 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none'
 
 const variantClasses = {
-  primary:  'bg-warm-500 text-white hover:bg-warm-600 active:bg-warm-700 shadow-soft hover:shadow-card',
-  secondary:'bg-cream-200 text-ink-700 hover:bg-cream-300 border border-cream-400',
-  ghost:    'text-ink-600 hover:bg-cream-200 hover:text-ink-800',
-  danger:   'bg-red-500 text-white hover:bg-red-600',
+  primary:
+    'bg-nl-primary text-white font-semibold rounded-full hover:bg-nl-primary-hover hover:-translate-y-px hover:shadow-nl-btn active:translate-y-0',
+  secondary:
+    'bg-white text-nl-text font-medium border border-nl-border rounded-2xl hover:bg-gray-50 hover:border-gray-400 active:bg-gray-100',
+  ghost:
+    'bg-transparent text-nl-muted font-medium rounded-full hover:bg-nl-beige hover:text-nl-text',
+  danger:
+    'bg-red-500 text-white font-semibold rounded-full hover:bg-red-600 hover:-translate-y-px hover:shadow-md active:translate-y-0',
 }
 
 const sizeClasses = {
-  sm: 'px-3 py-1.5 text-sm',
-  md: 'px-4 py-2 text-sm',
-  lg: 'px-6 py-3 text-base',
+  sm: 'h-9 px-3.5 text-sm',
+  md: 'h-11 px-5 text-[15px]',
+  lg: 'h-[52px] px-6 text-[15px]',
 }
 
 type Variant = keyof typeof variantClasses
 type Size = keyof typeof sizeClasses
 
-// href が指定された場合は Link として描画（Server Component でも使用可能）
 interface ButtonLinkProps {
   href: string
   variant?: Variant
@@ -30,7 +33,6 @@ interface ButtonLinkProps {
   children: React.ReactNode
 }
 
-// href がない場合は button として描画
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   href?: undefined
   variant?: Variant

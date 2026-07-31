@@ -91,7 +91,7 @@ export function LinkInput({ label, value, onChange, error, hint }: LinkInputProp
   return (
     <div className="flex flex-col gap-2">
       {label && (
-        <label className="text-sm font-medium text-ink-700">{label}</label>
+        <label className="text-sm font-medium text-nl-text">{label}</label>
       )}
 
       {/* 追加済みリンク一覧 */}
@@ -103,12 +103,12 @@ export function LinkInput({ label, value, onChange, error, hint }: LinkInputProp
             return (
               <div
                 key={link.type}
-                className="flex items-center gap-2.5 bg-white border border-cream-300 rounded-xl px-3 py-2.5"
+                className="flex items-center gap-2.5 bg-white border border-nl-border rounded-nl-input px-3 py-2.5"
               >
                 <span className="text-base shrink-0 w-6 text-center select-none">
                   {service.emoji}
                 </span>
-                <span className="text-sm font-medium text-ink-700 shrink-0 w-24">
+                <span className="text-sm font-medium text-nl-text shrink-0 w-24">
                   {service.label}
                 </span>
                 <input
@@ -116,12 +116,12 @@ export function LinkInput({ label, value, onChange, error, hint }: LinkInputProp
                   value={link.url}
                   onChange={(e) => updateUrl(link.type, e.target.value)}
                   placeholder={service.placeholder}
-                  className="flex-1 min-w-0 text-sm text-ink-800 placeholder:text-ink-300 bg-transparent outline-none"
+                  className="flex-1 min-w-0 text-sm text-nl-text placeholder:text-nl-muted/60 bg-transparent outline-none"
                 />
                 <button
                   type="button"
                   onClick={() => removeLink(link.type)}
-                  className="shrink-0 p-1 rounded-full text-ink-300 hover:text-ink-500 hover:bg-cream-100 transition-colors"
+                  className="shrink-0 p-1 rounded-full text-nl-muted/60 hover:text-nl-muted hover:bg-nl-beige transition-colors"
                   aria-label={`${service.label} を削除`}
                 >
                   <X className="w-3.5 h-3.5" />
@@ -138,10 +138,10 @@ export function LinkInput({ label, value, onChange, error, hint }: LinkInputProp
           type="button"
           onClick={() => setShowPicker((v) => !v)}
           className={cn(
-            'flex items-center gap-1.5 px-3 py-2 rounded-xl border text-sm font-medium transition-all duration-200',
+            'flex items-center gap-1.5 px-3 py-2 rounded-nl-input border text-sm font-medium transition-all duration-200',
             showPicker
-              ? 'border-warm-400 text-warm-600 bg-warm-50 ring-2 ring-warm-400/20'
-              : 'border-cream-400 text-ink-500 bg-white hover:border-warm-300 hover:text-warm-600 hover:bg-warm-50',
+              ? 'border-nl-primary text-nl-primary bg-nl-primary/10 shadow-nl-focus'
+              : 'border-nl-border text-nl-muted bg-white hover:border-nl-primary/40 hover:text-nl-primary hover:bg-nl-primary/10',
           )}
         >
           <Plus className="w-3.5 h-3.5" />
@@ -151,14 +151,14 @@ export function LinkInput({ label, value, onChange, error, hint }: LinkInputProp
         {showPicker && (
           <div
             className={cn(
-              'absolute z-50 mt-1.5 w-64 bg-white rounded-2xl border border-cream-200',
-              'shadow-lg shadow-ink-800/5',
+              'absolute z-50 mt-1.5 w-64 bg-white rounded-nl-card border border-nl-card-border',
+              'shadow-lg shadow-nl-card',
             )}
           >
             {/* ピッカー内検索 */}
-            <div className="px-3 pt-3 pb-2 border-b border-cream-100">
-              <div className="flex items-center gap-2 bg-cream-50 rounded-lg px-2.5 py-1.5">
-                <LinkIcon className="w-3.5 h-3.5 text-ink-400 shrink-0" />
+            <div className="px-3 pt-3 pb-2 border-b border-nl-card-border">
+              <div className="flex items-center gap-2 bg-nl-beige rounded-lg px-2.5 py-1.5">
+                <LinkIcon className="w-3.5 h-3.5 text-nl-muted shrink-0" />
                 <input
                   ref={pickerInputRef}
                   type="text"
@@ -169,7 +169,7 @@ export function LinkInput({ label, value, onChange, error, hint }: LinkInputProp
                   }}
                   onKeyDown={handlePickerKeyDown}
                   placeholder="サービスを検索"
-                  className="flex-1 text-xs text-ink-800 placeholder:text-ink-400 bg-transparent outline-none"
+                  className="flex-1 text-xs text-nl-text placeholder:text-nl-muted bg-transparent outline-none"
                 />
               </div>
             </div>
@@ -184,8 +184,8 @@ export function LinkInput({ label, value, onChange, error, hint }: LinkInputProp
                       className={cn(
                         'w-full flex items-center gap-2.5 px-3.5 py-2 text-sm transition-colors',
                         idx === pickerActive
-                          ? 'bg-warm-50 text-warm-700'
-                          : 'text-ink-700 hover:bg-cream-50',
+                          ? 'bg-nl-primary/10 text-nl-primary'
+                          : 'text-nl-text hover:bg-nl-beige',
                       )}
                       onMouseEnter={() => setPickerActive(idx)}
                       onMouseDown={(e) => {
@@ -202,7 +202,7 @@ export function LinkInput({ label, value, onChange, error, hint }: LinkInputProp
                 ))}
               </ul>
             ) : (
-              <div className="px-4 py-5 text-center text-sm text-ink-400">
+              <div className="px-4 py-5 text-center text-sm text-nl-muted">
                 {pickerQuery
                   ? `「${pickerQuery}」に一致するサービスがありません`
                   : '追加できるサービスがありません'}
@@ -213,7 +213,7 @@ export function LinkInput({ label, value, onChange, error, hint }: LinkInputProp
       </div>
 
       {error && <p className="text-xs text-red-500">{error}</p>}
-      {hint && !error && <p className="text-xs text-ink-400">{hint}</p>}
+      {hint && !error && <p className="text-xs text-nl-muted">{hint}</p>}
     </div>
   )
 }

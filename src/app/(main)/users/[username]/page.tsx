@@ -1,10 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
-import Link from 'next/link'
 import type { Metadata } from 'next'
 import { getLinkService } from '@/data/links'
-import { Avatar } from '@/components/ui/Avatar'
-import { Badge } from '@/components/ui/Badge'
+import { Avatar, Button, Card, EmptyState } from '@/components/ui'
 import { TagChip } from '@/components/ui/TagChip'
 import { ServiceCard } from '@/components/service/ServiceCard'
 import { FollowButton } from '@/components/profile/FollowButton'
@@ -109,8 +107,7 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 py-10">
-      {/* Profile Header */}
-      <div className="bg-white rounded-2xl border border-cream-300 shadow-soft p-6 sm:p-8 mb-8">
+      <Card className="p-6 sm:p-8 mb-8">
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
           <Avatar
             src={profile.avatar_url}
@@ -120,10 +117,10 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between gap-4 flex-wrap">
               <div>
-                <h1 className="text-2xl font-bold text-ink-800">
+                <h1 className="text-2xl font-bold text-nl-text">
                   {profile.username}
                 </h1>
-                <p className="text-ink-500">@{profile.slug || profile.username}</p>
+                <p className="text-nl-muted">@{profile.slug || profile.username}</p>
               </div>
               {currentUser && currentUser.id !== profile.id && (
                 <FollowButton
@@ -133,17 +130,14 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                 />
               )}
               {currentUser?.id === profile.id && (
-                <Link
-                  href="/settings/profile"
-                  className="px-4 py-2 text-sm font-medium text-ink-600 bg-cream-100 hover:bg-cream-200 rounded-xl border border-cream-300 transition-colors"
-                >
+                <Button href="/settings/profile" variant="secondary" size="sm">
                   プロフィール編集
-                </Link>
+                </Button>
               )}
             </div>
 
             {profile.bio && (
-              <p className="text-ink-600 mt-3 leading-relaxed">{profile.bio}</p>
+              <p className="text-nl-muted mt-3 leading-relaxed">{profile.bio}</p>
             )}
 
             {profile.tech_tags?.length > 0 && (
@@ -156,20 +150,19 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
 
             <div className="flex items-center gap-6 mt-4">
               <div className="text-sm">
-                <span className="font-semibold text-ink-800">{servicesWithFav.length}</span>
-                <span className="text-ink-500 ml-1">サービス</span>
+                <span className="font-semibold text-nl-text">{servicesWithFav.length}</span>
+                <span className="text-nl-muted ml-1">サービス</span>
               </div>
               <div className="text-sm">
-                <span className="font-semibold text-ink-800">{followersCount}</span>
-                <span className="text-ink-500 ml-1">フォロワー</span>
+                <span className="font-semibold text-nl-text">{followersCount}</span>
+                <span className="text-nl-muted ml-1">フォロワー</span>
               </div>
               <div className="text-sm">
-                <span className="font-semibold text-ink-800">{followingCount}</span>
-                <span className="text-ink-500 ml-1">フォロー中</span>
+                <span className="font-semibold text-nl-text">{followingCount}</span>
+                <span className="text-nl-muted ml-1">フォロー中</span>
               </div>
             </div>
 
-            {/* リンク（新フォーマット + 旧カラムフォールバック） */}
             {(() => {
               const newLinks: Array<{ type: string; url: string }> = profile.links || []
               const fallbackLinks = [
@@ -191,7 +184,7 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                         href={link.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-1.5 text-sm text-ink-500 hover:text-ink-700 transition-colors"
+                        className="flex items-center gap-1.5 text-sm text-nl-muted hover:text-nl-text transition-all duration-200"
                       >
                         <span className="text-base">{service.emoji}</span>
                         {service.label}
@@ -203,11 +196,10 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
             })()}
           </div>
         </div>
-      </div>
+      </Card>
 
-      {/* Services */}
       <div>
-        <h2 className="text-xl font-bold text-ink-800 mb-5">
+        <h2 className="text-xl font-bold text-nl-text mb-5">
           投稿したサービス
         </h2>
         {servicesWithFav.length > 0 ? (
@@ -221,18 +213,18 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
             ))}
           </div>
         ) : (
-          <div className="text-center py-16 bg-white rounded-2xl border border-cream-200">
-            <div className="text-4xl mb-3">📦</div>
-            <p className="text-ink-500">まだサービスを投稿していません</p>
-            {currentUser?.id === profile.id && (
-              <Link
-                href="/services/new"
-                className="inline-block mt-4 px-5 py-2.5 bg-warm-500 text-white rounded-xl text-sm font-medium hover:bg-warm-600 transition-colors"
-              >
-                最初のサービスを投稿する
-              </Link>
-            )}
-          </div>
+          <EmptyState
+            title="まだサービスを投稿していません"
+            description={
+              currentUser?.id === profile.id
+                ? '最初の作品を投稿して、ポートフォリオを始めましょう'
+                : undefined
+            }
+            actionLabel={
+              currentUser?.id === profile.id ? '最初のサービスを投稿する' : undefined
+            }
+            actionHref={currentUser?.id === profile.id ? '/services/new' : undefined}
+          />
         )}
       </div>
     </div>

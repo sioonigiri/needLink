@@ -49,13 +49,13 @@ export function FilterSelect({
         type="button"
         onClick={() => setOpen((v) => !v)}
         className={cn(
-          'flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-sm font-medium transition-colors',
+          'flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-sm font-medium transition-all duration-200',
           open || isActive
-            ? 'bg-warm-50 border border-warm-400 text-warm-700'
-            : 'bg-white border border-cream-300 text-ink-600 hover:border-warm-400 hover:text-warm-600'
+            ? 'bg-nl-primary/10 border border-nl-primary text-nl-primary'
+            : 'bg-white border border-nl-border text-nl-muted hover:border-nl-primary hover:text-nl-primary'
         )}
       >
-        <span className="text-ink-400 font-normal">{label}</span>
+        <span className="text-nl-muted font-normal">{label}</span>
         <span>{selected?.label}</span>
         <ChevronDown className={cn('w-3.5 h-3.5 transition-transform', open && 'rotate-180')} />
       </button>
@@ -63,7 +63,7 @@ export function FilterSelect({
       {open && (
         <div
           className={cn(
-            'absolute top-full left-0 mt-2 min-w-full bg-white rounded-2xl border border-cream-300 shadow-lg z-50 overflow-hidden py-1',
+            'absolute top-full left-0 mt-2 min-w-full bg-nl-card rounded-nl-card border border-nl-card-border shadow-nl-card z-50 overflow-hidden py-1',
             dropdownClassName ?? 'w-44'
           )}
         >
@@ -78,10 +78,10 @@ export function FilterSelect({
                   setOpen(false)
                 }}
                 className={cn(
-                  'w-full flex items-center justify-between gap-3 px-3.5 py-2.5 text-sm transition-colors text-left',
+                  'w-full flex items-center justify-between gap-3 px-3.5 py-2.5 text-sm transition-all duration-200 text-left',
                   active
-                    ? 'bg-warm-50 text-warm-700 font-medium'
-                    : 'text-ink-700 hover:bg-cream-50'
+                    ? 'bg-nl-primary/10 text-nl-primary font-medium'
+                    : 'text-nl-text hover:bg-nl-beige'
                 )}
               >
                 {opt.label}

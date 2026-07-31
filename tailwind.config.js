@@ -8,7 +8,23 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // NeedLink ウォームベージュパレット
+        // NeedLink Design System
+        nl: {
+          // Auth画面を基準にしたトークン
+          bg: '#FAF7F2',
+          card: '#FFFFFF',
+          primary: {
+            DEFAULT: '#D97706',
+            hover: '#B45309',
+            soft: 'rgba(217, 119, 6, 0.12)',
+          },
+          text: '#1F2937',
+          muted: '#57534E',
+          border: '#D1D5DB',
+          'card-border': '#E5E0D8',
+          beige: '#EFEBE4',
+        },
+        // Legacy palette（既存画面との互換用）
         cream: {
           50:  '#FDFCFA',
           100: '#FAF8F5',
@@ -47,11 +63,19 @@ module.exports = {
         '2xl': '1rem',
         '3xl': '1.5rem',
         '4xl': '2rem',
+        'nl-input': '14px',
+        'nl-card': '20px',
       },
       boxShadow: {
-        'soft': '0 2px 12px 0 rgba(44, 32, 24, 0.06)',
-        'card': '0 4px 24px 0 rgba(44, 32, 24, 0.08)',
-        'hover': '0 8px 32px 0 rgba(44, 32, 24, 0.12)',
+        soft: '0 2px 12px 0 rgba(44, 32, 24, 0.06)',
+        card: '0 4px 24px 0 rgba(44, 32, 24, 0.08)',
+        hover: '0 8px 32px 0 rgba(44, 32, 24, 0.12)',
+        'nl-card': '0 8px 30px rgba(0, 0, 0, 0.05)',
+        'nl-focus': '0 0 0 3px rgba(217, 119, 6, 0.12)',
+        'nl-btn': '0 8px 20px rgba(217, 119, 6, 0.35)',
+      },
+      transitionDuration: {
+        DEFAULT: '200ms',
       },
     },
   },

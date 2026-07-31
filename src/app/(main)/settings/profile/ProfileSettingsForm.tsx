@@ -5,16 +5,13 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { useForm, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Upload, X } from 'lucide-react'
-import Image from 'next/image'
+import { Upload } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
-import { Button } from '@/components/ui/Button'
-import { Input, Textarea } from '@/components/ui/Input'
+import { Button, Card, Input, Textarea, Avatar, Skeleton } from '@/components/ui'
 import { TagAutocomplete } from '@/components/ui/TagAutocomplete'
 import { LinkInput } from '@/components/ui/LinkInput'
 import { migrateOldLinks } from '@/data/links'
 import type { ProfileLink } from '@/types'
-import { Avatar } from '@/components/ui/Avatar'
 import type { Profile } from '@/types'
 
 const profileSchema = z.object({
@@ -223,11 +220,9 @@ export default function ProfileSettingsForm() {
 
   if (loading) {
     return (
-      <div className="max-w-2xl mx-auto px-4 sm:px-6 py-10">
-        <div className="animate-pulse space-y-4">
-          <div className="h-8 bg-cream-200 rounded-xl w-48" />
-          <div className="h-48 bg-cream-200 rounded-2xl" />
-        </div>
+      <div className="max-w-2xl mx-auto px-4 sm:px-6 py-10 space-y-4">
+        <Skeleton variant="text" className="h-8 w-48" />
+        <Skeleton variant="card" className="h-48" />
       </div>
     )
   }
@@ -235,34 +230,34 @@ export default function ProfileSettingsForm() {
   return (
     <div className="max-w-2xl mx-auto px-4 sm:px-6 py-10">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-ink-800">
+        <h1 className="text-2xl font-bold text-nl-text">
           {profile ? 'プロフィール設定' : 'プロフィールを設定する'}
         </h1>
         {!profile && (
-          <p className="text-ink-500 mt-1">まずプロフィールを設定してください</p>
+          <p className="text-nl-muted mt-1">まずプロフィールを設定してください</p>
         )}
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         {/* Avatar */}
-        <div className="bg-white rounded-2xl border border-cream-300 p-6">
-          <label className="text-sm font-medium text-ink-700 block mb-4">アイコン</label>
+        <Card className="p-6">
+          <label className="text-sm font-medium text-nl-text block mb-4">アイコン</label>
           <div className="flex items-center gap-4">
             <Avatar src={avatar} name={profile?.username} size="xl" />
             <div>
-              <label className="cursor-pointer flex items-center gap-2 px-4 py-2 bg-cream-100 hover:bg-cream-200 text-ink-700 text-sm font-medium rounded-xl border border-cream-300 transition-colors">
+              <label className="cursor-pointer inline-flex items-center gap-2 px-4 py-2 bg-nl-beige hover:bg-nl-card-border text-nl-text text-sm font-medium rounded-nl-input border border-nl-border transition-all duration-200">
                 <Upload className="w-4 h-4" />
                 画像をアップロード
                 <input type="file" className="hidden" accept="image/*" onChange={handleAvatarChange} />
               </label>
-              <p className="text-xs text-ink-400 mt-1.5">PNG, JPG, WebP (最大2MB)</p>
+              <p className="text-xs text-nl-muted mt-1.5">PNG, JPG, WebP (最大2MB)</p>
             </div>
           </div>
-        </div>
+        </Card>
 
         {/* Basic Info */}
-        <div className="bg-white rounded-2xl border border-cream-300 p-6 space-y-5">
-          <h2 className="font-semibold text-ink-800">基本情報</h2>
+        <Card className="p-6 space-y-5">
+          <h2 className="font-semibold text-nl-text">基本情報</h2>
 
           {/* Username */}
           <div className="flex flex-col gap-1.5">
@@ -300,20 +295,20 @@ export default function ProfileSettingsForm() {
             hint="得意な技術を追加してください（最大15個）"
             maxTags={15}
           />
-        </div>
+        </Card>
 
         {/* Links */}
-        <div className="bg-white rounded-2xl border border-cream-300 p-6 space-y-5">
-          <h2 className="font-semibold text-ink-800">リンク</h2>
+        <Card className="p-6 space-y-5">
+          <h2 className="font-semibold text-nl-text">リンク</h2>
           <LinkInput
             value={links}
             onChange={setLinks}
             hint="追加したいサービスを選んでURLを入力してください"
           />
-        </div>
+        </Card>
 
         {submitError && (
-          <div className="bg-red-50 border border-red-200 text-red-600 text-sm rounded-xl px-4 py-3">
+          <div className="bg-red-50 border border-red-200 text-red-600 text-sm rounded-nl-input px-4 py-3">
             {submitError}
           </div>
         )}

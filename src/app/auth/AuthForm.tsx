@@ -2,13 +2,13 @@
 
 import { useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { Mail, Lock, Eye, EyeOff, Loader2 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
-import { Button } from '@/components/ui/Button'
-import { Input } from '@/components/ui/Input'
 import Link from 'next/link'
+import { cn } from '@/lib/utils'
 
 const GoogleIcon = () => (
-  <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
+  <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24" aria-hidden="true">
     <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
     <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
     <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
@@ -24,6 +24,7 @@ export default function AuthForm() {
   )
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [googleLoading, setGoogleLoading] = useState(false)
   const [error, setError] = useState('')
@@ -77,13 +78,10 @@ export default function AuthForm() {
   async function handleGoogleAuth() {
     setGoogleLoading(true)
     const supabase = createClient()
-    // signup / login どちらも同じ OAuth フローを使う。
-    // コールバック側でプロフィール有無を判定して遷移先を振り分ける。
     await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
         redirectTo: `${location.origin}/auth/callback`,
-        // signup タブからの場合でも既存ユーザーはそのままログインされる
         queryParams: tab === 'signup' ? { prompt: 'select_account' } : {},
       },
     })
@@ -91,103 +89,190 @@ export default function AuthForm() {
   }
 
   return (
-    <div className="min-h-screen bg-cream-100 flex flex-col items-center justify-center px-4">
-      <div className="w-full max-w-md">
-        {/* Logo */}
-        <div className="text-center mb-8">
-          <Link href="/" className="text-2xl font-bold text-ink-800">
+    <div className="min-h-screen bg-nl-bg flex flex-col items-center justify-center px-4 py-14 sm:px-6">
+      <div className="w-full max-w-[420px]">
+        {/* Brand */}
+        <div className="text-center mb-11">
+          <Link
+            href="/"
+            className="inline-block text-[28px] font-bold tracking-tight text-nl-text transition-colors duration-200 hover:text-nl-primary"
+          >
             NeedLink
           </Link>
-          <p className="text-ink-500 mt-1 text-sm">個人開発者のためのショーケース</p>
+          <p className="mt-2.5 text-[15px] text-nl-muted leading-relaxed">
+            個人開発者のためのショーケース
+          </p>
         </div>
 
-        <div className="bg-white rounded-2xl border border-cream-300 shadow-soft p-8">
+        {/* Card */}
+        <div className="bg-nl-card rounded-nl-card border border-nl-card-border shadow-nl-card px-7 py-9 sm:px-10 sm:py-11">
           {/* Tabs */}
-          <div className="flex gap-1 bg-cream-100 p-1 rounded-xl mb-6">
-            <button
-              onClick={() => switchTab('login')}
-              className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${
-                tab === 'login'
-                  ? 'bg-white text-ink-800 shadow-soft'
-                  : 'text-ink-500 hover:text-ink-700'
-              }`}
-            >
-              ログイン
-            </button>
-            <button
-              onClick={() => switchTab('signup')}
-              className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${
-                tab === 'signup'
-                  ? 'bg-white text-ink-800 shadow-soft'
-                  : 'text-ink-500 hover:text-ink-700'
-              }`}
-            >
-              新規登録
-            </button>
-          </div>
-
-          {/* Google OAuth ボタン（最上部に配置） */}
-          <Button
-            variant="secondary"
-            className="w-full mb-4"
-            size="lg"
-            loading={googleLoading}
-            onClick={handleGoogleAuth}
+          <div
+            role="tablist"
+            aria-label="認証切替"
+            className="flex p-1.5 mb-9 rounded-2xl bg-[#EFEBE4]"
           >
-            <GoogleIcon />
-            {tab === 'login' ? 'Googleでログイン' : 'Googleで会員登録'}
-          </Button>
-
-          <div className="relative my-4">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-cream-200" />
-            </div>
-            <div className="relative flex justify-center text-xs text-ink-400 bg-white px-2">
-              またはメールで{tab === 'login' ? 'ログイン' : '登録'}
-            </div>
+            {([
+              { id: 'login' as const, label: 'ログイン' },
+              { id: 'signup' as const, label: '新規登録' },
+            ]).map((item) => {
+              const active = tab === item.id
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={active}
+                  onClick={() => switchTab(item.id)}
+                  className={cn(
+                    'flex-1 py-3 text-[15px] rounded-[14px] transition-all duration-200',
+                    active
+                      ? 'bg-white text-nl-primary font-semibold shadow-sm'
+                      : 'text-[#6B6560] font-medium hover:text-nl-text'
+                  )}
+                >
+                  {item.label}
+                </button>
+              )
+            })}
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <Input
-              label="メールアドレス"
-              type="email"
-              placeholder="you@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-            <Input
-              label="パスワード"
-              type="password"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              hint={tab === 'signup' ? '8文字以上で設定してください' : undefined}
-              required
-            />
+          {/* Google — secondary action */}
+          <button
+            type="button"
+            onClick={handleGoogleAuth}
+            disabled={googleLoading}
+            className={cn(
+              'w-full h-[52px] flex items-center justify-center gap-3 px-4',
+              'bg-white text-[15px] font-medium text-nl-text rounded-2xl',
+              'border border-[#D1D5DB]',
+              'transition-all duration-200 ease-out',
+              'hover:bg-[#F9FAFB] hover:border-[#9CA3AF]',
+              'active:bg-[#F3F4F6]',
+              'disabled:opacity-50 disabled:cursor-not-allowed'
+            )}
+          >
+            {googleLoading ? (
+              <Loader2 className="w-5 h-5 animate-spin text-nl-muted" />
+            ) : (
+              <GoogleIcon />
+            )}
+            {tab === 'login' ? 'Googleでログイン' : 'Googleで会員登録'}
+          </button>
+
+          {/* Divider */}
+          <div className="flex items-center gap-4 my-9">
+            <div className="flex-1 h-px bg-[#E5E0D8]" />
+            <span className="shrink-0 text-[13px] font-medium text-[#7A746C]">
+              またはメールで{tab === 'login' ? 'ログイン' : '登録'}
+            </span>
+            <div className="flex-1 h-px bg-[#E5E0D8]" />
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Email */}
+            <div className="flex flex-col gap-2.5">
+              <label htmlFor="auth-email" className="text-[14px] font-semibold text-nl-text">
+                メールアドレス
+              </label>
+              <div
+                className={cn(
+                  'flex items-center h-[52px] rounded-2xl border bg-white',
+                  'border-[#D1D5DB]',
+                  'transition-all duration-200',
+                  'focus-within:border-nl-primary focus-within:shadow-nl-focus'
+                )}
+              >
+                <Mail className="w-[18px] h-[18px] text-[#9CA3AF] ml-4 shrink-0" />
+                <input
+                  id="auth-email"
+                  type="email"
+                  placeholder="you@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  className="flex-1 h-full px-3 bg-transparent text-[15px] text-nl-text outline-none placeholder:text-[#A8A29E] min-w-0"
+                />
+              </div>
+            </div>
+
+            {/* Password */}
+            <div className="flex flex-col gap-2.5">
+              <label htmlFor="auth-password" className="text-[14px] font-semibold text-nl-text">
+                パスワード
+              </label>
+              <div
+                className={cn(
+                  'flex items-center h-[52px] rounded-2xl border bg-white',
+                  'border-[#D1D5DB]',
+                  'transition-all duration-200',
+                  'focus-within:border-nl-primary focus-within:shadow-nl-focus'
+                )}
+              >
+                <Lock className="w-[18px] h-[18px] text-[#9CA3AF] ml-4 shrink-0" />
+                <input
+                  id="auth-password"
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  className="flex-1 h-full px-3 bg-transparent text-[15px] text-nl-text outline-none placeholder:text-[#A8A29E] min-w-0"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((v) => !v)}
+                  className="p-2.5 mr-1.5 text-[#9CA3AF] hover:text-nl-text transition-colors duration-200"
+                  aria-label={showPassword ? 'パスワードを隠す' : 'パスワードを表示'}
+                >
+                  {showPassword ? <EyeOff className="w-[18px] h-[18px]" /> : <Eye className="w-[18px] h-[18px]" />}
+                </button>
+              </div>
+              {tab === 'signup' && (
+                <p className="text-[13px] text-[#7A746C]">8文字以上で設定してください</p>
+              )}
+            </div>
 
             {error && (
-              <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-600">
+              <div className="p-4 bg-red-50 border border-red-200 rounded-2xl text-[14px] text-red-700 leading-relaxed">
                 {error}
               </div>
             )}
             {message && (
-              <div className="p-3 bg-green-50 border border-green-200 rounded-xl text-sm text-green-700">
+              <div className="p-4 bg-green-50 border border-green-200 rounded-2xl text-[14px] text-green-800 leading-relaxed">
                 {message}
               </div>
             )}
 
-            <Button type="submit" loading={loading} className="w-full" size="lg">
+            {/* Primary CTA */}
+            <button
+              type="submit"
+              disabled={loading}
+              className={cn(
+                'w-full h-[52px] mt-1 flex items-center justify-center gap-2',
+                'text-white text-[15px] font-semibold rounded-full',
+                'bg-nl-primary',
+                'transition-all duration-200 ease-out',
+                'hover:bg-nl-primary-hover hover:-translate-y-px hover:shadow-nl-btn',
+                'active:translate-y-0 active:shadow-none',
+                'disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none'
+              )}
+            >
+              {loading && <Loader2 className="w-4 h-4 animate-spin" />}
               {tab === 'login' ? 'ログイン' : 'アカウントを作成'}
-            </Button>
+            </button>
           </form>
         </div>
 
-        <p className="text-center text-xs text-ink-400 mt-6">
+        <p className="text-center text-[13px] text-[#7A746C] mt-9 leading-relaxed">
           登録することで、
-          <Link href="#" className="text-warm-600 hover:underline">利用規約</Link>
+          <Link href="#" className="font-medium text-nl-primary hover:underline transition-colors duration-200">
+            利用規約
+          </Link>
           と
-          <Link href="#" className="text-warm-600 hover:underline">プライバシーポリシー</Link>
+          <Link href="#" className="font-medium text-nl-primary hover:underline transition-colors duration-200">
+            プライバシーポリシー
+          </Link>
           に同意したものとみなします。
         </p>
       </div>

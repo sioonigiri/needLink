@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui'
 
 interface FollowButtonProps {
   targetUserId: string
@@ -43,17 +43,15 @@ export function FollowButton({
   }
 
   return (
-    <button
+    <Button
+      type="button"
+      variant={following ? 'secondary' : 'primary'}
+      size="sm"
+      loading={loading}
       onClick={toggle}
-      disabled={loading}
-      className={cn(
-        'flex-1 px-3 py-2 text-sm font-medium rounded-xl border transition-all duration-200',
-        following
-          ? 'bg-warm-100 border-warm-200 text-warm-700 hover:bg-warm-200'
-          : 'bg-warm-500 border-warm-500 text-white hover:bg-warm-600'
-      )}
+      className="flex-1 rounded-nl-input"
     >
       {following ? 'フォロー中' : 'フォローする'}
-    </button>
+    </Button>
   )
 }

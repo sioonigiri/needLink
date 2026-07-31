@@ -20,8 +20,8 @@ export default async function NewServicePage() {
   return (
     <div className="max-w-2xl mx-auto px-4 sm:px-6 py-10">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-ink-800">サービスを投稿する</h1>
-        <p className="text-ink-500 mt-1">あなたが作ったサービスを世界に公開しましょう</p>
+        <h1 className="text-2xl font-bold text-nl-text">サービスを投稿する</h1>
+        <p className="text-nl-muted mt-1">あなたが作ったサービスを世界に公開しましょう</p>
       </div>
       <ServiceForm userId={user.id} />
     </div>
