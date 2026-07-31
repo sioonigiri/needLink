@@ -266,11 +266,11 @@ export default function AuthForm() {
 
         <p className="text-center text-[13px] text-[#7A746C] mt-9 leading-relaxed">
           登録することで、
-          <Link href="#" className="font-medium text-nl-primary hover:underline transition-colors duration-200">
+          <Link href="/terms" className="font-medium text-nl-primary hover:underline transition-colors duration-200">
             利用規約
           </Link>
           と
-          <Link href="#" className="font-medium text-nl-primary hover:underline transition-colors duration-200">
+          <Link href="/privacy" className="font-medium text-nl-primary hover:underline transition-colors duration-200">
             プライバシーポリシー
           </Link>
           に同意したものとみなします。

@@ -62,6 +62,16 @@ export function Footer() {
                     サポート
                   </Link>
                 </li>
+                <li>
+                  <Link href="/terms" className="text-sm text-nl-muted hover:text-nl-text transition-all duration-200">
+                    利用規約
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/privacy" className="text-sm text-nl-muted hover:text-nl-text transition-all duration-200">
+                    プライバシーポリシー
+                  </Link>
+                </li>
               </ul>
             </div>
           </div>
@@ -69,14 +79,25 @@ export function Footer() {
 
         <div className="mt-10 pt-6 border-t border-nl-card-border flex flex-col sm:flex-row justify-between items-center gap-4">
           <p className="text-xs text-nl-muted">© 2026 NeedLink. All rights reserved.</p>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 flex-wrap justify-center">
+            <Link
+              href="/terms"
+              className="text-xs text-nl-muted hover:text-nl-primary transition-all duration-200"
+            >
+              利用規約
+            </Link>
+            <Link
+              href="/privacy"
+              className="text-xs text-nl-muted hover:text-nl-primary transition-all duration-200"
+            >
+              プライバシーポリシー
+            </Link>
             <Link
               href="/support"
               className="text-xs text-nl-muted hover:text-nl-primary transition-all duration-200"
             >
               サポート
             </Link>
-            <p className="text-xs text-nl-muted">個人開発者のためのショーケース</p>
           </div>
         </div>
       </div>
