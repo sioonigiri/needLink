@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
 import type { Metadata } from 'next'
-import { Globe, ShoppingBag, Play, ExternalLink, Calendar, Pencil } from 'lucide-react'
+import { Globe, ShoppingBag, Play, ExternalLink, Calendar, Pencil, Heart } from 'lucide-react'
 import { GithubIcon, XIcon } from '@/components/ui/Icons'
 import { Avatar, Badge, Button, Card } from '@/components/ui'
 import { TagChip } from '@/components/ui/TagChip'
@@ -13,6 +13,15 @@ import { cn, formatDate } from '@/lib/utils'
 import { FavoriteButton } from '@/components/service/FavoriteButton'
 import { DeleteServiceButton } from '@/components/service/DeleteServiceButton'
 import { FollowButton } from '@/components/profile/FollowButton'
+import { FeedbackSection } from '@/components/community/FeedbackSection'
+import { TimelineSection } from '@/components/community/TimelineSection'
+import { MessageButton } from '@/components/community/MessageButton'
+import type {
+  DevelopmentLog,
+  FeedbackWithProfile,
+  Profile,
+  UpdateHistory,
+} from '@/types'
 
 interface ServiceDetailPageProps {
   params: { id: string }
@@ -88,6 +97,42 @@ export default async function ServiceDetailPage({ params }: ServiceDetailPagePro
     isFollowing = !!follow
   }
 
+  const isOwner = !!(user && user.id === service.user_id)
+
+  const [
+    { data: feedbackRaw },
+    { data: logsRaw },
+    { data: updatesRaw },
+  ] = await Promise.all([
+    (supabase as any)
+      .from('feedback')
+      .select('*, profile:profiles(*)')
+      .eq('service_id', params.id)
+      .order('created_at', { ascending: true }),
+    (supabase as any)
+      .from('development_logs')
+      .select('*')
+      .eq('service_id', params.id)
+      .order('logged_at', { ascending: false })
+      .order('created_at', { ascending: false }),
+    (supabase as any)
+      .from('update_histories')
+      .select('*')
+      .eq('service_id', params.id)
+      .order('released_at', { ascending: false })
+      .order('created_at', { ascending: false }),
+  ])
+
+  const feedbackItems: FeedbackWithProfile[] = ((feedbackRaw || []) as any[])
+    .filter((f) => f.profile)
+    .map((f) => ({
+      ...f,
+      profile: f.profile as Profile,
+    }))
+
+  const developmentLogs = (logsRaw || []) as DevelopmentLog[]
+  const updateHistories = (updatesRaw || []) as UpdateHistory[]
+
   const links = [
     { icon: Globe, label: 'Webサイト', url: service.website_url },
     { icon: GithubIcon, label: 'GitHub', url: service.github_url },
@@ -111,7 +156,7 @@ export default async function ServiceDetailPage({ params }: ServiceDetailPagePro
         <div className="p-6 sm:p-8">
           <div className="flex items-start justify-between gap-4 flex-wrap">
             <div>
-              <div className="flex items-center gap-3 mb-2">
+              <div className="flex items-center gap-3 mb-2 flex-wrap">
                 <span
                   className={cn(
                     'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium',
@@ -119,6 +164,13 @@ export default async function ServiceDetailPage({ params }: ServiceDetailPagePro
                   )}
                 >
                   {SERVICE_STATUS_LABELS[status]}
+                </span>
+                <span
+                  className="inline-flex items-center gap-1.5 text-sm text-nl-muted"
+                  title="お気に入り数"
+                >
+                  <Heart className="w-4 h-4 fill-red-400 text-red-400" aria-hidden />
+                  <span className="font-medium text-nl-text tabular-nums">{favCount}</span>
                 </span>
               </div>
               <h1 className="text-2xl sm:text-3xl font-bold text-nl-text mb-2">
@@ -223,6 +275,26 @@ export default async function ServiceDetailPage({ params }: ServiceDetailPagePro
               </div>
             </Card>
           )}
+
+          <TimelineSection
+            mode="dev"
+            serviceId={service.id}
+            isOwner={isOwner}
+            items={developmentLogs}
+          />
+
+          <TimelineSection
+            mode="update"
+            serviceId={service.id}
+            isOwner={isOwner}
+            items={updateHistories}
+          />
+
+          <FeedbackSection
+            serviceId={service.id}
+            currentUserId={user?.id || null}
+            initialItems={feedbackItems}
+          />
         </div>
 
         <div className="space-y-4">
@@ -256,19 +328,29 @@ export default async function ServiceDetailPage({ params }: ServiceDetailPagePro
                 ))}
               </div>
             )}
-            <div className="mt-4 flex gap-2">
+            <div className="mt-4 flex flex-col gap-2">
               {user?.id !== profile.id && (
-                <FollowButton
-                  targetUserId={profile.id}
-                  currentUserId={user?.id || null}
-                  initialFollowing={isFollowing}
-                />
+                <>
+                  <div className="flex gap-2">
+                    <FollowButton
+                      targetUserId={profile.id}
+                      currentUserId={user?.id || null}
+                      initialFollowing={isFollowing}
+                    />
+                  </div>
+                  <MessageButton
+                    recipientId={profile.id}
+                    recipientName={profile.username}
+                    currentUserId={user?.id || null}
+                    className="w-full rounded-nl-input"
+                  />
+                </>
               )}
               <Button
                 href={`/users/${profile.slug || profile.username}`}
                 variant="secondary"
                 size="sm"
-                className="flex-1 rounded-nl-input"
+                className="w-full rounded-nl-input"
               >
                 プロフィールを見る
               </Button>

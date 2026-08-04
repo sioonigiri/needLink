@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Search, PlusCircle, Heart, User, LogOut, Menu, X } from 'lucide-react'
+import { Search, PlusCircle, Heart, User, LogOut, Menu, X, MessageSquare, Bell } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { Button, Avatar } from '@/components/ui'
 import { useState, useEffect } from 'react'
@@ -10,9 +10,15 @@ import type { Profile } from '@/types'
 
 interface HeaderProps {
   profile?: Profile | null
+  unreadNotifications?: number
+  unreadMessages?: number
 }
 
-export function Header({ profile }: HeaderProps) {
+export function Header({
+  profile,
+  unreadNotifications = 0,
+  unreadMessages = 0,
+}: HeaderProps) {
   const router = useRouter()
   const [menuOpen, setMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
@@ -34,6 +40,13 @@ export function Header({ profile }: HeaderProps) {
     'flex items-center gap-1.5 px-3 py-2 text-sm text-nl-muted hover:text-nl-text hover:bg-nl-beige rounded-lg transition-all duration-200'
   const mobileLink =
     'flex items-center gap-2 px-3 py-2.5 text-sm text-nl-text hover:bg-nl-beige rounded-lg transition-all duration-200'
+
+  const badge = (count: number) =>
+    count > 0 ? (
+      <span className="absolute -top-1 -right-1 min-w-[1.1rem] h-[1.1rem] px-1 rounded-full bg-nl-primary text-white text-[10px] font-semibold flex items-center justify-center">
+        {count > 99 ? '99+' : count}
+      </span>
+    ) : null
 
   return (
     <header
@@ -69,6 +82,20 @@ export function Header({ profile }: HeaderProps) {
                 >
                   <PlusCircle className="w-4 h-4" />
                   投稿する
+                </Link>
+                <Link href="/messages" className={`${navLink} relative`}>
+                  <span className="relative">
+                    <MessageSquare className="w-4 h-4" />
+                    {badge(unreadMessages)}
+                  </span>
+                  メッセージ
+                </Link>
+                <Link href="/notifications" className={`${navLink} relative`}>
+                  <span className="relative">
+                    <Bell className="w-4 h-4" />
+                    {badge(unreadNotifications)}
+                  </span>
+                  通知
                 </Link>
                 <div className="relative group ml-1">
                   <button className="flex items-center gap-2 p-1.5 rounded-xl hover:bg-nl-beige transition-all duration-200">
@@ -144,6 +171,20 @@ export function Header({ profile }: HeaderProps) {
                 >
                   <PlusCircle className="w-4 h-4" />
                   投稿する
+                </Link>
+                <Link href="/messages" className={mobileLink} onClick={() => setMenuOpen(false)}>
+                  <MessageSquare className="w-4 h-4" />
+                  メッセージ
+                  {unreadMessages > 0 && (
+                    <span className="ml-auto text-xs font-semibold text-nl-primary">{unreadMessages}</span>
+                  )}
+                </Link>
+                <Link href="/notifications" className={mobileLink} onClick={() => setMenuOpen(false)}>
+                  <Bell className="w-4 h-4" />
+                  通知
+                  {unreadNotifications > 0 && (
+                    <span className="ml-auto text-xs font-semibold text-nl-primary">{unreadNotifications}</span>
+                  )}
                 </Link>
                 <Link
                   href={`/users/${profile.slug || profile.username}`}

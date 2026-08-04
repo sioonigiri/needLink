@@ -6,6 +6,8 @@ import { Avatar, Button, Card, EmptyState } from '@/components/ui'
 import { TagChip } from '@/components/ui/TagChip'
 import { ServiceCard } from '@/components/service/ServiceCard'
 import { FollowButton } from '@/components/profile/FollowButton'
+import { ProfileFollowStats } from '@/components/profile/ProfileFollowStats'
+import { MessageButton } from '@/components/community/MessageButton'
 import { ServiceWithProfile } from '@/types'
 
 interface UserProfilePageProps {
@@ -59,8 +61,8 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
 
   const [
     { data: servicesRaw },
-    { data: followersResult },
-    { data: followingResult },
+    { count: followersCount },
+    { count: followingCount },
   ] = await Promise.all([
     supabase
       .from('services')
@@ -69,11 +71,11 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
       .order('created_at', { ascending: false }),
     supabase
       .from('follows')
-      .select('id', { count: 'exact' })
+      .select('*', { count: 'exact', head: true })
       .eq('following_id', profile.id),
     supabase
       .from('follows')
-      .select('id', { count: 'exact' })
+      .select('*', { count: 'exact', head: true })
       .eq('follower_id', profile.id),
   ])
 
@@ -102,9 +104,6 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
     is_favorited: favoriteServiceIds.includes(s.id),
   }))
 
-  const followersCount = followersResult?.length || 0
-  const followingCount = followingResult?.length || 0
-
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 py-10">
       <Card className="p-6 sm:p-8 mb-8">
@@ -122,12 +121,23 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                 </h1>
                 <p className="text-nl-muted">@{profile.slug || profile.username}</p>
               </div>
-              {currentUser && currentUser.id !== profile.id && (
-                <FollowButton
-                  targetUserId={profile.id}
-                  currentUserId={currentUser.id}
-                  initialFollowing={isFollowing}
-                />
+              {(!currentUser || currentUser.id !== profile.id) && (
+                <div className="flex items-center gap-2 shrink-0">
+                  {currentUser && (
+                    <FollowButton
+                      targetUserId={profile.id}
+                      currentUserId={currentUser.id}
+                      initialFollowing={isFollowing}
+                      className="rounded-nl-input"
+                    />
+                  )}
+                  <MessageButton
+                    recipientId={profile.id}
+                    recipientName={profile.username}
+                    currentUserId={currentUser?.id || null}
+                    className="rounded-nl-input"
+                  />
+                </div>
               )}
               {currentUser?.id === profile.id && (
                 <Button href="/settings/profile" variant="secondary" size="sm">
@@ -148,20 +158,13 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
               </div>
             )}
 
-            <div className="flex items-center gap-6 mt-4">
-              <div className="text-sm">
-                <span className="font-semibold text-nl-text">{servicesWithFav.length}</span>
-                <span className="text-nl-muted ml-1">サービス</span>
-              </div>
-              <div className="text-sm">
-                <span className="font-semibold text-nl-text">{followersCount}</span>
-                <span className="text-nl-muted ml-1">フォロワー</span>
-              </div>
-              <div className="text-sm">
-                <span className="font-semibold text-nl-text">{followingCount}</span>
-                <span className="text-nl-muted ml-1">フォロー中</span>
-              </div>
-            </div>
+            <ProfileFollowStats
+              profileId={profile.id}
+              servicesCount={servicesWithFav.length}
+              followersCount={followersCount || 0}
+              followingCount={followingCount || 0}
+              currentUserId={currentUser?.id || null}
+            />
 
             {(() => {
               const newLinks: Array<{ type: string; url: string }> = profile.links || []

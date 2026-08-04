@@ -4,6 +4,40 @@ export type Profile = Database['public']['Tables']['profiles']['Row']
 export type Service = Database['public']['Tables']['services']['Row']
 export type Favorite = Database['public']['Tables']['favorites']['Row']
 export type Follow = Database['public']['Tables']['follows']['Row']
+export type Feedback = Database['public']['Tables']['feedback']['Row']
+export type DevelopmentLog = Database['public']['Tables']['development_logs']['Row']
+export type UpdateHistory = Database['public']['Tables']['update_histories']['Row']
+export type Conversation = Database['public']['Tables']['conversations']['Row']
+export type Message = Database['public']['Tables']['messages']['Row']
+export type MessageRequest = Database['public']['Tables']['message_requests']['Row']
+export type Notification = Database['public']['Tables']['notifications']['Row']
+
+export type FeedbackWithProfile = Feedback & { profile: Profile }
+export type DevelopmentLogWithMeta = DevelopmentLog
+export type UpdateHistoryWithMeta = UpdateHistory
+
+export type ConversationWithPeer = Conversation & {
+  peer: Profile
+  last_message?: Message | null
+  unread_count: number
+}
+
+export type MessageRequestWithSender = MessageRequest & {
+  sender: Profile
+}
+
+export type NotificationWithActor = Notification & {
+  actor?: Profile | null
+}
+
+export type { UserRole } from './roles'
+export {
+  USER_ROLES,
+  DEFAULT_USER_ROLE,
+  isUserRole,
+  normalizeUserRole,
+  canSeeDetailedErrors,
+} from './roles'
 
 export type ProfileLink = { type: string; url: string }
 

@@ -6,6 +6,8 @@ import { Trash2 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { setFlashToast } from '@/components/ui/ToastProvider'
 import { Button, Dialog } from '@/components/ui'
+import { useUserRole } from '@/components/providers/ProfileProvider'
+import { getDisplayError } from '@/lib/errors'
 
 interface DeleteServiceButtonProps {
   serviceId: string
@@ -19,6 +21,7 @@ export function DeleteServiceButton({
   redirectTo = '/',
 }: DeleteServiceButtonProps) {
   const router = useRouter()
+  const role = useUserRole()
   const [open, setOpen] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -43,7 +46,8 @@ export function DeleteServiceButton({
       .eq('user_id', user.id)
 
     if (deleteError) {
-      setError(`削除に失敗しました: ${deleteError.message}`)
+      console.error(deleteError)
+      setError(getDisplayError(deleteError, role, 'エラーが発生しました。'))
       setDeleting(false)
       return
     }

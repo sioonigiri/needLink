@@ -1,11 +1,13 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Mail, Lock, Eye, EyeOff, Loader2 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
+import { getDisplayError } from '@/lib/errors'
+import { DEFAULT_USER_ROLE, normalizeUserRole } from '@/types/roles'
 
 const GoogleIcon = () => (
   <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24" aria-hidden="true">
@@ -30,6 +32,13 @@ export default function AuthForm() {
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
 
+  useEffect(() => {
+    // callback 失敗時は詳細を出さずユーザー向け文言のみ
+    if (searchParams.get('error') === 'google_login_failed') {
+      setError('Googleログインに失敗しました')
+    }
+  }, [searchParams])
+
   function switchTab(next: 'login' | 'signup') {
     setTab(next)
     setError('')
@@ -53,12 +62,14 @@ export default function AuthForm() {
         },
       })
       if (error) {
+        console.error(error)
         if (error.message.toLowerCase().includes('already registered') ||
             error.message.toLowerCase().includes('already been registered')) {
           setError('このメールアドレスはすでに登録されています。ログインしてください。')
           switchTab('login')
         } else {
-          setError(error.message)
+          // 未ログイン時は role 不明のため user 向け表示（developer 詳細はログイン後）
+          setError(getDisplayError(error, DEFAULT_USER_ROLE, 'エラーが発生しました。'))
         }
       } else {
         setMessage('確認メールを送信しました。メールをご確認ください。')
@@ -66,6 +77,7 @@ export default function AuthForm() {
     } else {
       const { error } = await supabase.auth.signInWithPassword({ email, password })
       if (error) {
+        console.error(error)
         setError('メールアドレスまたはパスワードが正しくありません')
       } else {
         router.push('/settings/profile')
@@ -77,15 +89,37 @@ export default function AuthForm() {
 
   async function handleGoogleAuth() {
     setGoogleLoading(true)
+    setError('')
+    setMessage('')
     const supabase = createClient()
-    await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: `${location.origin}/auth/callback`,
-        queryParams: tab === 'signup' ? { prompt: 'select_account' } : {},
-      },
-    })
-    setGoogleLoading(false)
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${location.origin}/auth/callback`,
+          queryParams: tab === 'signup' ? { prompt: 'select_account' } : {},
+        },
+      })
+      if (error) {
+        console.error(error)
+        let role = DEFAULT_USER_ROLE
+        const { data: { user } } = await supabase.auth.getUser()
+        if (user) {
+          const { data: profile } = await (supabase as any)
+            .from('profiles')
+            .select('role')
+            .eq('id', user.id)
+            .maybeSingle()
+          role = normalizeUserRole(profile?.role)
+        }
+        setError(getDisplayError(error, role, 'Googleログインに失敗しました'))
+      }
+    } catch (err) {
+      console.error(err)
+      setError(getDisplayError(err, DEFAULT_USER_ROLE, 'Googleログインに失敗しました'))
+    } finally {
+      setGoogleLoading(false)
+    }
   }
 
   return (

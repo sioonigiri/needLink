@@ -15,6 +15,8 @@ import { TagChip } from '@/components/ui/TagChip'
 import { SERVICE_CATEGORIES, getCategoriesByIds } from '@/data/categories'
 import { ServiceStatus } from '@/types'
 import { cn } from '@/lib/utils'
+import { getDisplayError } from '@/lib/errors'
+import { useUserRole } from '@/components/providers/ProfileProvider'
 
 const serviceSchema = z.object({
   name: z.string().min(1, 'サービス名は必須です').max(50, '50文字以内で入力してください'),
@@ -36,6 +38,7 @@ interface ServiceFormProps {
 
 export function ServiceForm({ userId, initialData }: ServiceFormProps) {
   const router = useRouter()
+  const role = useUserRole()
   const [tags, setTags] = useState<string[]>(initialData?.tags || [])
   const [categories, setCategories] = useState<string[]>(initialData?.categories || [])
   const [tagAccOpen, setTagAccOpen] = useState(false)
@@ -107,6 +110,7 @@ export function ServiceForm({ userId, initialData }: ServiceFormProps) {
       if (thumbnailFile) {
         thumbnailUrl = await uploadImage(thumbnailFile, `${userId}/thumbnails`)
         if (!thumbnailUrl) {
+          console.error('thumbnail upload failed')
           setSubmitError('サムネイルのアップロードに失敗しました。')
           return
         }
@@ -144,11 +148,6 @@ export function ServiceForm({ userId, initialData }: ServiceFormProps) {
         "ALTER TABLE public.services ADD COLUMN IF NOT EXISTS categories TEXT[] DEFAULT '{}'; " +
         "NOTIFY pgrst, 'reload schema';"
 
-      function formatSaveError(message: string) {
-        if (/categories/i.test(message)) return categoriesMigrationHint
-        return message
-      }
-
       const client = supabase as any
 
       if (initialData?.id) {
@@ -159,14 +158,24 @@ export function ServiceForm({ userId, initialData }: ServiceFormProps) {
           .select('id, categories')
           .single()
         if (error) {
-          setSubmitError(`更新に失敗しました: ${formatSaveError(error.message)}`)
+          console.error(error)
+          setSubmitError(
+            getDisplayError(
+              /categories/i.test(error.message) ? categoriesMigrationHint : error,
+              role,
+              'エラーが発生しました。'
+            )
+          )
           return
         }
         if (
           categories.length > 0 &&
           (!updated?.categories || updated.categories.length === 0)
         ) {
-          setSubmitError(categoriesMigrationHint)
+          console.error(categoriesMigrationHint)
+          setSubmitError(
+            getDisplayError(categoriesMigrationHint, role, 'エラーが発生しました。')
+          )
           return
         }
         router.push(`/services/${initialData.id}`)
@@ -177,18 +186,31 @@ export function ServiceForm({ userId, initialData }: ServiceFormProps) {
           .select('id, categories')
           .single()
         if (error) {
-          setSubmitError(`投稿に失敗しました: ${formatSaveError(error.message)}`)
+          console.error(error)
+          setSubmitError(
+            getDisplayError(
+              /categories/i.test(error.message) ? categoriesMigrationHint : error,
+              role,
+              'エラーが発生しました。'
+            )
+          )
           return
         }
         if (!newService?.id) {
-          setSubmitError('投稿に失敗しました。時間をおいて再度お試しください。')
+          console.error('insert succeeded without service id')
+          setSubmitError(
+            getDisplayError('投稿結果の取得に失敗しました。', role, 'エラーが発生しました。')
+          )
           return
         }
         if (
           categories.length > 0 &&
           (!newService.categories || newService.categories.length === 0)
         ) {
-          setSubmitError(categoriesMigrationHint)
+          console.error(categoriesMigrationHint)
+          setSubmitError(
+            getDisplayError(categoriesMigrationHint, role, 'エラーが発生しました。')
+          )
           return
         }
         router.push(`/services/${newService.id}`)
@@ -196,9 +218,7 @@ export function ServiceForm({ userId, initialData }: ServiceFormProps) {
       router.refresh()
     } catch (err) {
       console.error(err)
-      setSubmitError(
-        err instanceof Error ? err.message : '予期しないエラーが発生しました。'
-      )
+      setSubmitError(getDisplayError(err, role, 'エラーが発生しました。'))
     } finally {
       setSubmitting(false)
     }

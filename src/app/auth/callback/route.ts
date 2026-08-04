@@ -25,23 +25,26 @@ export async function GET(request: NextRequest) {
       }
     )
 
-    const { data: { user } } = await supabase.auth.exchangeCodeForSession(code)
+    const { data: { user }, error } = await supabase.auth.exchangeCodeForSession(code)
 
-    if (user) {
-      // プロフィールが既に存在するか確認
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('username')
-        .eq('id', user.id)
-        .maybeSingle()
+    if (error || !user) {
+      console.error(error ?? 'exchangeCodeForSession: no user')
+      return NextResponse.redirect(`${origin}/auth?error=google_login_failed`)
+    }
 
-      if (profile) {
-        // 既存ユーザー → ホームへ
-        response.headers.set('Location', `${origin}/`)
-      } else {
-        // 新規ユーザー → プロフィール設定へ
-        response.headers.set('Location', `${origin}/settings/profile`)
-      }
+    // プロフィールが既に存在するか確認
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('username')
+      .eq('id', user.id)
+      .maybeSingle()
+
+    if (profile) {
+      // 既存ユーザー → ホームへ
+      response.headers.set('Location', `${origin}/`)
+    } else {
+      // 新規ユーザー → プロフィール設定へ
+      response.headers.set('Location', `${origin}/settings/profile`)
     }
 
     return response

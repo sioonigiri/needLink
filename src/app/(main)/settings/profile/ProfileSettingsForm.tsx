@@ -13,6 +13,9 @@ import { LinkInput } from '@/components/ui/LinkInput'
 import { migrateOldLinks } from '@/data/links'
 import type { ProfileLink } from '@/types'
 import type { Profile } from '@/types'
+import { normalizeUserRole } from '@/types/roles'
+import { getDisplayError } from '@/lib/errors'
+import { useUserRole } from '@/components/providers/ProfileProvider'
 
 const profileSchema = z.object({
   username: z
@@ -84,7 +87,9 @@ export default function ProfileSettingsForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const from = searchParams.get('from')
+  const contextRole = useUserRole()
   const [profile, setProfile] = useState<Profile | null>(null)
+  const role = profile ? normalizeUserRole(profile.role) : contextRole
   const [techTags, setTechTags] = useState<string[]>([])
   const [links, setLinks] = useState<ProfileLink[]>([])
   const [avatar, setAvatar] = useState<string | null>(null)
@@ -126,17 +131,21 @@ export default function ProfileSettingsForm() {
         .single()
 
       if (data) {
-        setProfile(data)
-        setTechTags(data.tech_tags || [])
-        const existingLinks: ProfileLink[] = data.links || []
-        setLinks(existingLinks.length > 0 ? existingLinks : migrateOldLinks(data))
-        setAvatar(data.avatar_url)
-        setInitialUsername(data.username || '')
-        setInitialSlug(data.slug || '')
+        const nextProfile: Profile = {
+          ...(data as Profile),
+          role: normalizeUserRole((data as Profile).role),
+        }
+        setProfile(nextProfile)
+        setTechTags(nextProfile.tech_tags || [])
+        const existingLinks: ProfileLink[] = nextProfile.links || []
+        setLinks(existingLinks.length > 0 ? existingLinks : migrateOldLinks(nextProfile))
+        setAvatar(nextProfile.avatar_url)
+        setInitialUsername(nextProfile.username || '')
+        setInitialSlug(nextProfile.slug || '')
         reset({
-          username: data.username || '',
-          slug: data.slug || '',
-          bio: data.bio || '',
+          username: nextProfile.username || '',
+          slug: nextProfile.slug || '',
+          bio: nextProfile.bio || '',
         })
       }
       setLoading(false)
@@ -195,7 +204,8 @@ export default function ProfileSettingsForm() {
     }
 
     if (saveError) {
-      setSubmitError(`保存に失敗しました: ${saveError.message}`)
+      console.error(saveError)
+      setSubmitError(getDisplayError(saveError, role, 'エラーが発生しました。'))
       setSubmitting(false)
       return
     }

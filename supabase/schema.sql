@@ -212,4 +212,21 @@ CREATE POLICY "認証済みユーザーがサービス画像をアップロー�
 ALTER TABLE public.services
   ADD COLUMN IF NOT EXISTS categories TEXT[] DEFAULT '{}';
 
+-- ============================================================
+-- Migration: profiles テーブルに role カラムを追加
+-- 値: user | developer | admin（将来拡張用）
+-- ============================================================
+ALTER TABLE public.profiles
+  ADD COLUMN IF NOT EXISTS role TEXT NOT NULL DEFAULT 'user';
+
+-- 制約が既にある場合はスキップされることがあるため、必要なら手動で制約を確認
+-- ALTER TABLE public.profiles DROP CONSTRAINT IF EXISTS profiles_role_check;
+-- ALTER TABLE public.profiles
+--   ADD CONSTRAINT profiles_role_check CHECK (role IN ('user', 'developer', 'admin'));
+
 NOTIFY pgrst, 'reload schema';
+
+-- ============================================================
+-- Phase 2 Community は別ファイルを実行してください
+-- supabase/phase2_community.sql
+-- ============================================================
